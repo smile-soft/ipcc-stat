@@ -137,7 +137,13 @@
 				.then(function(){
 					if(vm.options.callstable.columns.callresult) {
 						return getCallResolutionStat();
-					} else if(vm.options.callstable.columns.logins) {
+					} else {
+						return $q.defer().resolve();
+					}
+				})
+				.then(function() {
+					if(vm.options.callstable.columns.login) {
+						debug.log('vm.options.callstable.columns.login: ', vm.options.callstable.columns.login);
 						return getLoginsRatio();
 					} else {
 						return $q.defer().resolve();
@@ -527,7 +533,7 @@
 		function getLoginsRatio() {
 			var data, tables = vm.options.db.tables, taskKind = 1,
 			rdata = {},
-			metrics = ['count(case when probcat != 0 then probcat else null end) as logins', 'count(*) as total'];
+			metrics = ['count(case when probcat != 0 then probcat else null end) as tlogins'];
 
 			return api.getCustomListStatistics({
 				tables: [tables.calls.name],
@@ -535,7 +541,7 @@
 				tabrel: 'taskid in (\''+getTaskIds([taskKind]).join('\',\'')+'\')',
 						// 'and '+[tables.calls.name, tables.calls.columns.callresult].join('.')+' = 1',
 				procid: [tables.calls.name, tables.calls.columns.process_id].join('.'),
-				// columns: [tables.calls.columns.callresult],
+				columns: [tables.calls.columns.login],
 				// columns: [tables.calls.columns.category, tables.categories.columns.description],
 				begin: vm.begin.valueOf(),
 				end: vm.end.valueOf(),
@@ -546,8 +552,7 @@
 					rdata = result.data.result[0];
 					vm.stat = vm.stat || {};
 					vm.stat[utils.getFriendlyKind(taskKind)] = vm.stat[utils.getFriendlyKind(taskKind)] || {};
-					vm.stat[utils.getFriendlyKind(taskKind)].callsWithLogin = rdata.tlogins;
-					vm.stat[utils.getFriendlyKind(taskKind)].callsWithoutLogin = rdata.total;
+					vm.stat[utils.getFriendlyKind(taskKind)].ncu = rdata.tlogins;
 					
 					debug.log('getLoginsRatio stat: ', vm.stat[utils.getFriendlyKind(taskKind)]);
 					return result;

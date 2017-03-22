@@ -17,7 +17,8 @@
 				"calldate": "calltime",
 				"comments": "comments",
 				"cid": "cid",
-				"callresult": "callresult"
+				"callresult": "callresult",
+				"login": "login"
 			}
 		},
 		"categories": {

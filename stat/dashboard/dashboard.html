@@ -31,112 +31,120 @@
 	<div ng-if="!dashVm.stat[kind.name].taskid.length" layout layout-padding>
 		<h3 class="md-headline" flex>No data for period</h3>
 	</div>
+
 	<div layout="row" layout-wrap ng-if="dashVm.stat[kind.name].taskid.length" ng-cloak>
-		<div flex="30" flex-xs="100" flex-order="1">
+		<stat-card
+			ng-if="dashVm.data[kind.name].sl !== undefined"
+			flex-value=""
+			flex-xs="100"
+			title="SL" 
+			subhead="Service Level ({{dashVm.data[kind.name].sl}}), %" 
+			model="{{ dashVm.stat[kind.name]['sl'+dashVm.data[kind.name].sl] | average: dashVm.data[kind.name].list.length | number: 0}}" 
+			prevstat="{{ dashVm.prevstat[kind.name]['sl'+dashVm.data[kind.name].sl] | diff:dashVm.stat[kind.name]['sl'+dashVm.data[kind.name].sl] }}"
+			dynamics="{{ dashVm.prevstat[kind.name]['sl'+dashVm.data[kind.name].sl] | diff:dashVm.stat[kind.name]['sl'+dashVm.data[kind.name].sl]:'dynamics' }}">
+		</stat-card>
+		<stat-card
+			ng-if="dashVm.globalCr[kind.name] !== undefined"
+			flex-value=""
+			flex-xs="100"
+			title="CRR" 
+			subhead="Call Resolution Rate, %" 
+			model="{{(dashVm.globalCr[kind.name] / dashVm.stat[kind.name].nca * 100) | number: 0}}" 
+			prevstat="{{ dashVm.prevstat[kind.name].car | diff:dashVm.stat[kind.name].car }}"
+			dynamics="{{ dashVm.prevstat[kind.name].car | diff:dashVm.stat[kind.name].car:'dynamics' }}">
+		</stat-card>
+		<stat-card
+			ng-if="dashVm.stat[kind.name].car !== undefined"
+			flex-value=""
+			flex-xs="100"
+			title="CAR" 
+			subhead="Call Answer Rate, %" 
+			model="{{dashVm.stat[kind.name].car | average: dashVm.data[kind.name].list.length | number: 0}}" 
+			prevstat="{{ dashVm.prevstat[kind.name].car | diff:dashVm.stat[kind.name].car }}"
+			dynamics="{{ dashVm.prevstat[kind.name].car | diff:dashVm.stat[kind.name].car:'dynamics' }}">
+		</stat-card>
+		<stat-card
+			ng-if="dashVm.stat[kind.name].asa !== undefined"
+			flex-value=""
+			flex-xs="100"
+			title="ASA" 
+			subhead="Average Speed of Answer" 
+			model="{{dashVm.stat[kind.name].asa | average: dashVm.data[kind.name].list.length | timer}}" 
+			prevstat="{{ dashVm.prevstat[kind.name].asa | diff:dashVm.stat[kind.name].asa }}"
+			dynamics="{{ dashVm.prevstat[kind.name].asa | diff:dashVm.stat[kind.name].asa:'dynamics-reverse' }}">
+		</stat-card>
+		<stat-card 
+			flex-value=""
+			flex-xs="100"
+			title="NCO" 
+			subhead="Number of Calls Offered" 
+			model="{{dashVm.stat[kind.name].nco | number: 0}}"
+			prevstat="{{dashVm.prevstat[kind.name].nco | diff:dashVm.stat[kind.name].nco }}"
+			dynamics="{{dashVm.prevstat[kind.name].nco | diff:dashVm.stat[kind.name].nco:'dynamics' }}">
+		</stat-card>
+		<stat-card 
+			flex-value=""
+			flex-xs="100"
+			title="AHT" 
+			subhead="Average Handle Time" 
+			model="{{dashVm.stat[kind.name].aht | average: dashVm.data[kind.name].list.length | timer }}" 
+			prevstat="{{dashVm.prevstat[kind.name].aht | diff:dashVm.stat[kind.name].aht }}">
+		</stat-card>
+	</div>
+	<div layout="row" layout-wrap ng-if="dashVm.stat[kind.name].taskid.length" ng-cloak>
+		<div flex="33" flex-xs="100">
 			<md-card>
-				<md-card-header>
-					<md-card-header-text layout="column">
-						<stat-card 
-							flex 
-							title="NCA"
-							card-class="no-margin no-shadow"
-							subhead="Number Calls Answered" 
-							model="{{dashVm.stat[kind.name].nca | number: 0}}" 
-							prevstat="{{dashVm.prevstat[kind.name].nca | diff:dashVm.stat[kind.name].nca }}"
-							dynamics="{{dashVm.prevstat[kind.name].nca | diff:dashVm.stat[kind.name].nca:'dynamics'}}">
-						</stat-card>
-					</md-card-header-text>
-				</md-card-header>
 				<md-card-content layout-align="center">
-					<canvas id="nc-chart" class="chart chart-doughnut"
-					  chart-data="[dashVm.stat[kind.name].nca, (dashVm.stat[kind.name].nco - dashVm.stat[kind.name].nca)]" chart-labels="['Number Calls Answered', 'Not Answered Calls']" chart-legend="true" chart-colours="['#3F51B5', '#9E9E9E']">
+					<stat-card 
+						flex 
+						title="NCA"
+						subhead="Number Calls Answered" 
+						card-class="no-margin no-shadow"
+						model="{{dashVm.stat[kind.name].nca | number: 0}}" 
+						prevstat="{{dashVm.prevstat[kind.name].nca | diff:dashVm.stat[kind.name].nca }}"
+						dynamics="{{dashVm.prevstat[kind.name].nca | diff:dashVm.stat[kind.name].nca:'dynamics'}}">
+					</stat-card>
+					<canvas flex id="nc-chart" class="chart chart-doughnut"
+					  chart-data="[dashVm.stat[kind.name].nca, (dashVm.stat[kind.name].nco - dashVm.stat[kind.name].nca)]" chart-labels="['Number of Calls Answered', 'Not Answered Calls']" chart-legend="true" chart-colours="['#3F51B5', '#9E9E9E']">
 					</canvas> 
 				</md-card-content>
 			</md-card>
 		</div>
-
-		<div flex="40" flex-xs="100" flex-order="2" flex-order-xs="-1" layout="row" layout-align="center start" layout-wrap>
-			<div layout flex="grow">
-				<stat-card
-					ng-if="dashVm.data[kind.name].sl !== undefined"
-					flex-value=""
-					title="SL" 
-					subhead="Service Level ({{dashVm.data[kind.name].sl}}), %" 
-					model="{{ dashVm.stat[kind.name]['sl'+dashVm.data[kind.name].sl] | average: dashVm.data[kind.name].list.length | number: 0}}" 
-					prevstat="{{ dashVm.prevstat[kind.name]['sl'+dashVm.data[kind.name].sl] | diff:dashVm.stat[kind.name]['sl'+dashVm.data[kind.name].sl] }}"
-					dynamics="{{ dashVm.prevstat[kind.name]['sl'+dashVm.data[kind.name].sl] | diff:dashVm.stat[kind.name]['sl'+dashVm.data[kind.name].sl]:'dynamics' }}">
-				</stat-card>
-				<stat-card
-					ng-if="dashVm.globalCr[kind.name] !== undefined"
-					flex-value=""
-					title="CRR" 
-					subhead="Call Resolution Rate, %" 
-					model="{{(dashVm.globalCr[kind.name] / dashVm.stat[kind.name].nca * 100) | number: 0}}" 
-					prevstat="{{ dashVm.prevstat[kind.name].car | diff:dashVm.stat[kind.name].car }}"
-					dynamics="{{ dashVm.prevstat[kind.name].car | diff:dashVm.stat[kind.name].car:'dynamics' }}">
-				</stat-card>
-			</div>
-			<div layout flex="grow">
-				<stat-card
-					ng-if="dashVm.stat[kind.name].car !== undefined"
-					flex-value=""
-					title="CAR" 
-					subhead="Call Answer Rate, %" 
-					model="{{dashVm.stat[kind.name].car | average: dashVm.data[kind.name].list.length | number: 0}}" 
-					prevstat="{{ dashVm.prevstat[kind.name].car | diff:dashVm.stat[kind.name].car }}"
-					dynamics="{{ dashVm.prevstat[kind.name].car | diff:dashVm.stat[kind.name].car:'dynamics' }}">
-				</stat-card>
-				<stat-card
-					ng-if="dashVm.stat[kind.name].asa !== undefined"
-					flex-value=""
-					title="ASA" 
-					subhead="Average Speed of Answer" 
-					model="{{dashVm.stat[kind.name].asa | average: dashVm.data[kind.name].list.length | timer}}" 
-					prevstat="{{ dashVm.prevstat[kind.name].asa | diff:dashVm.stat[kind.name].asa }}"
-					dynamics="{{ dashVm.prevstat[kind.name].asa | diff:dashVm.stat[kind.name].asa:'dynamics-reverse' }}">
-				</stat-card>
-			</div>
-			<div layout flex="grow">
-				<stat-card 
-					flex-value=""
-					title="NCO" 
-					subhead="Number Calls Offered" 
-					model="{{dashVm.stat[kind.name].nco | number: 0}}"
-					prevstat="{{dashVm.prevstat[kind.name].nco | diff:dashVm.stat[kind.name].nco }}"
-					dynamics="{{dashVm.prevstat[kind.name].nco | diff:dashVm.stat[kind.name].nco:'dynamics' }}">
-				</stat-card>
-				<stat-card 
-					flex-value=""
-					title="AHT" 
-					subhead="Average Handle Time" 
-					model="{{dashVm.stat[kind.name].aht | average: dashVm.data[kind.name].list.length | timer }}" 
-					prevstat="{{dashVm.prevstat[kind.name].aht | diff:dashVm.stat[kind.name].aht }}">
-				</stat-card>
-			</div>
-		</div>
-
-		<div flex="30" flex-xs="100" flex-order="3">
+		<div flex="33" flex-xs="100">
 			<md-card>
-				<md-card-header>
-					<md-card-header-text layout="column">
-						<stat-card 
-							flex="50" 
-							title="ATT"
-							card-class="no-margin no-shadow"
-							subhead="Average Talk Time" 
-							model="{{dashVm.stat[kind.name].att | average: dashVm.data[kind.name].list.length | timer }}" 
-							prevstat="{{dashVm.prevstat[kind.name].att | diff:dashVm.stat[kind.name].att }}">
-						</stat-card>
-					</md-card-header-text>
-				</md-card-header>
 				<md-card-content layout="column" layout-align="center">
-					<canvas id="nc-chart" class="chart chart-doughnut"
+					<stat-card 
+						flex
+						title="ATT"
+						subhead="Average Talk Time" 
+						card-class="no-margin no-shadow"
+						model="{{dashVm.stat[kind.name].att | average: dashVm.data[kind.name].list.length | timer }}" 
+						prevstat="{{dashVm.prevstat[kind.name].att | diff:dashVm.stat[kind.name].att }}">
+					</stat-card>
+					<canvas flex id="nc-chart" class="chart chart-doughnut"
 					  chart-data="[ (dashVm.stat[kind.name].att / (dashVm.data[kind.name].list.length || 1)).toFixed(1) , (dashVm.stat[kind.name].aht / (dashVm.data[kind.name].list.length || 1) - dashVm.stat[kind.name].att / (dashVm.data[kind.name].list.length || 1)).toFixed(1) ]" chart-labels="['Average Talk Time', 'Average Wrap Time']" chart-legend="true" chart-colours="['#3F51B5', '#9E9E9E']">
 					</canvas> 
 				</md-card-content>
 			</md-card>
 		</div>
+		<div flex="33" flex-xs="100" ng-if="dashVm.options.callstable.columns.login">
+			<md-card>
+				<md-card-content layout="column" layout-align="center">
+					<stat-card 
+						flex
+						title="NCU"
+						subhead="Number of Calls from Users, %" 
+						card-class="no-margin no-shadow"
+						model="{{ (dashVm.stat[kind.name].ncu / dashVm.stat[kind.name].nco * 100) | number: 0 }}" >
+					</stat-card>
+					<canvas flex id="nc-chart" class="chart chart-doughnut"
+					  chart-data="[ dashVm.stat[kind.name].ncu, (dashVm.stat[kind.name].nco - dashVm.stat[kind.name].ncu) ]" chart-labels="['Number of Calls from Users', 'Number of Calls Offered']" chart-legend="true" chart-colours="['#3F51B5', '#9E9E9E']">
+					</canvas> 
+				</md-card-content>
+			</md-card>
+		</div>
 	</div>
+
 </section>
 <section class="default-background">
 	<div layout layout-align="center stretch" layout-wrap layout-fill>

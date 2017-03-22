@@ -20,6 +20,8 @@
                         <th md-column>NCO, %</th>
                         <th md-column>NCA</th>
                         <th md-column>NCA, %</th>
+                        <th md-column>NCU</th>
+                        <th md-column>NCU, %</th>
                         <th md-column>AHT</th>
                         <th md-column>AHT, %</th>
                         <th md-column>ATT</th>
@@ -35,6 +37,8 @@
                         <td md-cell></td>
                         <td md-cell>{{::dashExpVm.stat[kind.name].nca}}</td>
                         <td md-cell></td>
+                        <td md-cell>{{::dashExpVm.stat[kind.name].ncu}}</td>
+                        <td md-cell>{{ (dashExpVm.stat[kind.name].ncu / dashExpVm.stat[kind.name].nco * 100) | number:0 }}</td>
                         <td md-cell>{{::dashExpVm.stat[kind.name].aht | average: dashExpVm.data[kind.name].list.length | duration:1}}</td>
                         <td md-cell></td>
                         <td md-cell>{{::dashExpVm.stat[kind.name].att | average: dashExpVm.data[kind.name].list.length | duration:1}}</td>
