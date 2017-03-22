@@ -1,0 +1,26 @@
+<md-sidenav md-component-id="sidenav" md-is-open="sidemenuVm.isOpen">
+	<md-toolbar layout>
+	    <div class="md-toolbar-tools">
+	        <md-button class="md-icon-button" aria-label="Menu" ng-click="topbarVm.toggleSidemenu()">
+	            <i class="material-icons">menu</i>
+	        </md-button>
+	        <h2>Smile IPCC Dashboard</h2>
+	    </div>
+	</md-toolbar>
+	<md-content>
+		<md-list>
+			<md-list-item class="md-list-item-text">
+				<a href="#/dashboard" layout="row" layout-align="start center" flex="grow">
+					<i class="material-icons">dashboard</i>
+					<span>Dashboard</span>
+				</a>
+			</md-list-item>
+			<md-list-item class="md-list-item-text">
+				<a href="#/crr" layout="row" layout-align="start center" flex="grow">
+					<i class="material-icons">assignment_turned_in</i>
+					<span>Call Resolution Rate</span>
+				</a>
+			</md-list-item>
+		</md-list>
+	</md-content>
+</md-sidenav>

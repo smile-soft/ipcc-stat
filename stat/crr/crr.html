@@ -1,0 +1,51 @@
+<section layout="column" layout-gt-xs="row" layout-padding layout-align="start center">
+	<div layout layout-align="center" layout-align-gt-xs="start center" layout-wrap>
+		<md-datepicker ng-model="crrVm.begin" md-max-date="crrVm.end"></md-datepicker>
+		<md-datepicker ng-model="crrVm.end" md-min-date="crrVm.begin"></md-datepicker>
+		<md-button hide-xs class="md-primary" ng-click="crrVm.getCallResolution()" aria-label="Update Statistics">Update</md-button>		
+	</div>
+	<span flex></span>
+	<div layout layout-align="end center" flex>
+		<md-button class="md-icon-button md-primary" ng-click="crrVm.openSettings($event)" aria-label="Open CRR Settings"><md-icon>settings</md-icon></md-button>
+	</div>
+</section>
+<md-divider layout flex></md-divider>
+<section layout>
+	<md-card flex>
+		<md-toolbar>
+			<div class="md-toolbar-tools">
+				<h2>Call Resolution Rate</h2>
+				<span flex></span>
+				<md-button href="#" download="call-resolution.xls" onclick="ExcellentExport.excel(this, 'performance-table', 'Category Sheet');">.xlsx</md-button>
+				<md-button href="#" download="call-resolution.csv" onclick="ExcellentExport.csv(this, 'performance-table');">.csv</md-button>
+			</div>
+		</md-toolbar>
+		<spinner name="crr-loader" show="true"><md-progress-linear md-mode="indeterminate"></md-progress-linear></spinner>
+		<md-card-content layout="row" layout-wrap>
+			<md-table-container flex>
+				<table md-table id="performance-table">
+					<thead md-head md-order="crrVm.tableSort">
+						<tr md-row>
+							<th md-column md-order-by="operator">Agent</th>
+							<th md-column md-numeric md-order-by="perf">Call Resolution, %</th>
+							<th md-column md-numeric md-order-by="['count(*)']">Total calls</th>
+							<th md-column md-numeric md-order-by="['count(callresult)']">Resolved calls</th>
+							<th md-column md-numeric md-order-by="['sum(connectTime)']">Total talk time</th>
+							<th md-column md-numeric md-order-by="['avg(connectTime)']">Avg. talk time</th>
+						</tr>
+					</thead>
+					<tbody md-body>
+						<tr md-row ng-repeat="stat in crrVm.stat | orderBy: crrVm.tableSort">
+							<td md-cell>{{stat.operator}}</td>
+							<td md-cell>{{ stat.perf | number:2 }}</td>
+							<td md-cell>{{stat['count(*)']}}</td>
+							<td md-cell>{{ stat['count(callresult)'] }}</td>
+							<td md-cell>{{stat['sum(connectTime)'] | timer}}</td>
+							<td md-cell>{{stat['avg(connectTime)'] | timer}}</td>
+						</tr>
+					</tbody>
+				</table>
+			</md-table-container>
+		</md-card-content>
+	</md-card>
+</section>

@@ -1,0 +1,32 @@
+<md-dialog flex="auto" aria-label="Agents performance settings">
+    <md-toolbar>
+        <div class="md-toolbar-tools">
+            <h2>Agents performance settings</h2>
+            <span flex></span>
+            <md-button class="md-icon-button" ng-click="crrSettsVm.close()">
+                <i class="material-icons">close</i>
+            </md-button>
+        </div>
+    </md-toolbar>
+    <md-dialog-content>
+        <div layout="column" layout-gt-xs="row" layout-padding>
+            <div flex>
+                <md-subheader>Tasks</md-subheader>
+                <md-list>
+                    <md-checkbox ng-model="crrSettsVm.allTasksSelected" ng-change="crrSettsVm.selectAllTasks()" aria-label="Select All Tasks">
+                            Select All
+                    </md-checkbox>
+                    <md-list-item ng-repeat="item in crrSettsVm.tasks">
+                        <md-checkbox ng-checked="crrSettsVm.exists(item, crrSettsVm.selectedTasks)" ng-click="crrSettsVm.toggle(item, crrSettsVm.selectedTasks)" aria-label="Selected tasks">
+                        </md-checkbox>
+                        {{item}}
+                    </md-list-item>
+                </md-list>
+            </div>
+        </div>
+    </md-dialog-content>
+    <md-dialog-actions>
+        <md-button class="md-primary" aria-label="Save" ng-click="crrSettsVm.save()">Submit</md-button>
+        <md-button ng-click="crrSettsVm.close()">Close</md-button>
+    </md-dialog-actions>
+</md-dialog>

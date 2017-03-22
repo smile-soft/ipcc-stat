@@ -1,0 +1,38 @@
+.default-background {
+	background-color: #f1f1f1;
+}
+
+.text-positive {
+	color: #69b241;
+}
+.text-negative {
+	color: rgb(255,87,34);
+}
+
+.no-margin {
+	margin: 0;
+}
+.no-shadow {
+	box-shadow: none;
+}
+.clickable {
+	cursor: pointer;
+}
+
+.no-margin {
+	margin: 0 !important;
+}
+
+.no-padding {
+	padding: 0 !important;
+}
+
+.no-vt-padding {
+	padding-top: 0 !important;
+	padding-bottom: 0 !important;
+}
+
+.no-hr-padding {
+	padding-right: 0 !important;
+	padding-left: 0 !important;
+}

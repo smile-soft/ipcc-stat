@@ -1,0 +1,16 @@
+<md-card flex="{{::flexValue}}" ng-class="cardClass">
+	<md-card-header>
+		<md-card-header-text>
+			<div layout>
+				<span class="md-title" flex="70">{{::title}}</span>
+				<span class="md-body-1 text-positive" ng-if="model && dynamics == 'true'" layout layout-align="end center" flex="30">{{prevstat}}</span>
+				<span class="md-body-1 text-negative" ng-if="model && dynamics == 'false'" layout layout-align="end center" flex="30">{{prevstat}}</span>
+				<span class="md-body-1" ng-if="model && !dynamics" layout layout-align="end center" flex="30">{{prevstat}}</span>
+			</div>
+			<span class="md-subhead" flex="grow">{{subhead}}</span>
+		</md-card-header-text>
+	</md-card-header>
+	<md-card-content layout layout-align="center">
+		<span class="md-headline">{{model || 'No data for period'}}</span>
+	</md-card-content>
+</md-card>

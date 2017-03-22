@@ -1,0 +1,50 @@
+<md-dialog flex="auto" ng-cloak aria-label="Task Kind Settings">
+    <md-toolbar>
+        <div class="md-toolbar-tools">
+            <h2>{{kindSetVm.kind.name}}</h2>
+            <span flex></span>
+            <md-button class="md-icon-button" ng-click="kindSetVm.close()">
+                <i class="material-icons">close</i>
+            </md-button>
+        </div>
+    </md-toolbar>
+    <md-dialog-content>
+        <div layout="column" layout-gt-xs="row" layout-padding>
+            <div flex>
+                <md-subheader>Tasks</md-subheader>
+                <md-list>
+                    <md-checkbox ng-model="kindSetVm.allTasksSelected" ng-change="kindSetVm.selectAllTasks()" aria-label="Select All Tasks">
+                            Select All
+                    </md-checkbox>
+                    <md-list-item ng-repeat="item in kindSetVm.tasks">
+                        <md-checkbox ng-checked="kindSetVm.exists(item, kindSetVm.list)" ng-click="kindSetVm.toggle(item, kindSetVm.list)" aria-label="Selected tasks">
+                        </md-checkbox>
+                        {{item}}
+                    </md-list-item>
+                </md-list>
+            </div>
+            <div flex>
+                <md-subheader>Metrics</md-subheader>
+                <md-list>
+                    <md-list-item ng-repeat="item in kindSetVm.metrics">
+                        <md-checkbox ng-checked="kindSetVm.exists(item, kindSetVm.kindMetrics)" ng-click="kindSetVm.toggle(item, kindSetVm.kindMetrics)" aria-label="Selected metrics">
+                        </md-checkbox>
+                        {{item}}
+                    </md-list-item>
+                </md-list>
+            </div>
+            <div ng-hide="kindSetVm.sl === null" flex>
+                <md-subheader>SL</md-subheader>
+                <md-select ng-model="kindSetVm.sl" aria-label="Service Level">
+                    <md-option ng-value="item" ng-repeat="item in kindSetVm.defaultSL">
+                        {{item}}
+                    </md-option>
+                </md-select>
+            </div>
+        </div>
+    </md-dialog-content>
+    <md-dialog-actions>
+        <md-button class="md-primary" aria-label="Save" ng-click="kindSetVm.save()">Submit</md-button>
+        <md-button ng-click="kindSetVm.close()">Close</md-button>
+    </md-dialog-actions>
+</md-dialog>

@@ -1,0 +1,44 @@
+<md-dialog flex="auto" ng-cloak aria-label="Dashboard Settings">
+	<md-toolbar>
+	    <div class="md-toolbar-tools">
+	        <h2>Dashboard Settings</h2>
+	        <span flex></span>
+	        <md-button class="md-icon-button" ng-click="dashSetVm.close()">
+	            <i class="material-icons">close</i>
+	        </md-button>
+	    </div>
+	</md-toolbar>
+	<md-dialog-content>
+		<form name="dashSettings" layout="row" layout-align="start" layout-wrap layout-padding>
+			<div layout="column" flex="100" flex-gt-xs="30">
+				<md-switch ng-model="dashSetVm.options.autoupdate" aria-label="Autoupdate" flex>Autoupdate</md-switch>
+				<md-input-container flex ng-if="dashSetVm.options.autoupdate">
+					<label>Autoupdate Interval</label>
+					<md-select ng-model="dashSetVm.options.updateEvery" placeholder="Update every">
+				    	<md-option ng-value="int" ng-repeat="int in dashSetVm.intervals">{{int}}</md-option>
+					</md-select>
+				</md-input-container>
+				<md-input-container flex>
+					<label>Default Period</label>
+					<md-select ng-model="dashSetVm.options.period" placeholder="Defaut period">
+				    	<md-option ng-value="period" ng-repeat="period in dashSetVm.periods">{{period}}</md-option>
+					</md-select>
+				</md-input-container>
+			</div>
+			<div layout="column" flex="100" flex-gt-xs="70">
+				<md-subheader>Task Kinds</md-subheader>
+				<md-list flex>
+				    <md-list-item ng-repeat="item in dashSetVm.options.kindsList">
+				        <md-checkbox ng-checked="dashSetVm.index(item, dashSetVm.options.kinds) > -1" ng-click="dashSetVm.toggle(item, dashSetVm.options.kinds)" aria-label="Selected tasks kinds">
+				        </md-checkbox>
+				        {{item.name}}
+				    </md-list-item>
+				</md-list>	
+			</div>
+		</form>
+	</md-dialog-content>
+	<md-dialog-actions>
+	    <md-button class="md-primary" aria-label="Save" ng-click="dashSetVm.save()">Save</md-button>
+		<md-button ng-click="dashSetVm.close()">Close</md-button>
+	</md-dialog-actions>
+</md-dialog>

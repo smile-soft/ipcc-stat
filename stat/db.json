@@ -1,0 +1,47 @@
+{
+	"tables": {
+		"processed": {
+			"name": "processed"
+		},
+		"calls": {
+			"name": "probstat",
+			"columns": {
+				"process_id": "procid",
+				"customer_name": "cname",
+				"customer_phone": "cphone",
+				"category": "probcat",
+				"subcategory": "probdetails",
+				"company": "probcompany",
+				"newcompany": "newcompany",
+				"operator": "operator",
+				"calldate": "calltime",
+				"comments": "comments",
+				"cid": "cid",
+				"callresult": "callresult"
+			}
+		},
+		"categories": {
+			"name": "probcat",
+			"columns": {
+				"id": "catid",
+				"description": "catdesc"
+			}
+		},
+		"subcategories": {
+			"name": "probdetails",
+			"columns": {
+				"id": "subid",
+				"category_id": "catid",
+				"description": "probdesc"
+			}
+		},
+		"companies": {
+			"name": "probcompany",
+			"columns": {
+				"id": "compid",
+				"category_id": "catid",
+				"description": "compdesc"
+			}
+		}
+	}
+}

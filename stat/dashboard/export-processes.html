@@ -1,0 +1,61 @@
+<md-dialog aria-label="Export Processes">
+    <md-toolbar>
+        <div class="md-toolbar-tools">
+            <h2>Export Processes ({{::procExpVm.begin | date: 'shortDate'}} - {{::procExpVm.end | date: 'shortDate'}})</h2>
+            <span flex></span>
+            <md-button class="md-icon-button" ng-click="procExpVm.close()">
+                <i class="material-icons">close</i>
+            </md-button>
+        </div>
+    </md-toolbar>
+    <md-dialog-content>
+        <md-subheader class="md-primary">
+            <div layout="row">
+                <md-input-container class="no-margin">
+                    <label>Search</label>
+                    <input ng-model="procExpVm.search">
+                </md-input-container>
+                <md-input-container ng-if="procExpVm.tables.calls.columns.callresult" class="no-margin">
+                    <label>Filter By</label>
+                    <md-select ng-model="procExpVm.filter.callresult">
+                        <md-option value>No filter</md-option>
+                        <md-option value="1">Resolved calls</md-option>
+                        <md-option value="0">Unresolved calls</md-option>
+                    </md-select>
+                </md-input-container>
+            </div>
+        </md-subheader>
+        <md-table-container>
+            <table md-table id="proc-table">
+                <thead md-order="procExpVm.order" md-head>
+                    <tr md-row>
+                        <th md-order-by="{{procExpVm.tables.calls.columns.calldate}}" md-column>Date</th>
+                        <th md-order-by="{{procExpVm.tables.calls.columns.operator}}" md-column>Operator</th>
+                        <th ng-if="procExpVm.tables.calls.columns.customer_name" md-order-by="{{procExpVm.tables.calls.columns.customer_name}}" md-column>Name</th>
+                        <th md-order-by="{{procExpVm.tables.calls.columns.customer_phone}}" md-column>Phone</th>
+                        <th ng-if="procExpVm.tables.calls.columns.company" md-order-by="{{procExpVm.tables.companies.columns.description}}" md-column>Company</th>
+                        <th md-order-by="{{procExpVm.tables.calls.columns.comments}}" md-column>Comment</th>
+                        <th ng-if="procExpVm.tables.calls.columns.callresult" md-order-by="{{procExpVm.tables.calls.columns.callresult}}" md-column>Call Resolution</th>
+                    </tr>
+                </thead>
+                <tbody md-body>
+                    <tr md-row ng-repeat="item in procExpVm.data | filter:procExpVm.search | filter:procExpVm.filter:procExpVm.tables.calls.columns.callresult | orderBy: procExpVm.order">
+                        <td md-cell>{{::item[procExpVm.tables.calls.columns.calldate]}}</td>
+                        <td md-cell>{{::item[procExpVm.tables.calls.columns.operator]}}</td>
+                        <td ng-if="procExpVm.tables.calls.columns.customer_name" md-cell>{{::item[procExpVm.tables.calls.columns.customer_name]}}</td>
+                        <td md-cell>{{::item[procExpVm.tables.calls.columns.customer_phone]}}</td>
+                        <td ng-if="procExpVm.tables.calls.columns.company" md-cell>{{::item[procExpVm.tables.companies.columns.description]}}</td>
+                        <td md-cell>{{::item[procExpVm.tables.calls.columns.comments]}}</td>
+                        <td ng-if="item[procExpVm.tables.calls.columns.callresult] === 1" md-cell>+</td>
+                        <td ng-if="item[procExpVm.tables.calls.columns.callresult] === 0" md-cell>-</td>
+                    </tr>
+                </tbody>
+            </table>
+        </md-table-container>
+    </md-dialog-content>
+    <md-dialog-actions>
+        <md-button href="#" download="{{::procExpVm.exportName}}.xls" onclick="ExcellentExport.excel(this, 'proc-table', 'Processes Sheet');" ng-click="procExpVm.export('xlsx')" class="md-primary">.xlsx</md-button>
+        <md-button href="#" download="{{::procExpVm.exportName}}.csv" onclick="ExcellentExport.csv(this, 'proc-table');" ng-click="procExpVm.export('csv')" class="md-primary">.csv</md-button>
+        <md-button ng-click="procExpVm.close()">Close</md-button>
+    </md-dialog-actions>
+</md-dialog>
