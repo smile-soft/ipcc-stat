@@ -17,6 +17,7 @@
             getSlIndex: getSlIndex,
             getFriendlyKind: getFriendlyKind,
             extendAndSum: extendAndSum,
+            sortObjBy: sortObjBy,
             queryToObject: queryToObject,
             periodToRange: periodToRange,
             filterByKey: filterByKey,
@@ -100,6 +101,15 @@
             return obj1;
         }
 
+        function sortObjBy(array, key, descend){
+            var sorted = array.sort(function(a, b){
+                if(a[key] > b[key]) return descend ? -1 : 1;
+                if(a[key] < b[key]) return descend ? 1 : -1;
+                return 0;
+            });
+            return sorted;
+        }
+
         function queryToObject(data, keys){
             var obj, key;
             return data.map(function(item) {
@@ -118,7 +128,10 @@
                 begin: moment().startOf(arr[1]).toDate(),
                 end: moment().endOf(arr[1]).toDate()
             };
-            // return moment().subtract(arr[0], arr[1]).toDate();
+            // return {
+            //     begin: moment().subtract(parseInt(arr[0], 10), arr[1]).toDate(),
+            //     end: moment().endOf('day').toDate()
+            // }
         }
 
         function filterByKey(object, key){

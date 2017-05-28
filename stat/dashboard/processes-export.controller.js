@@ -17,6 +17,8 @@
 		vm.end = end;
 		vm.data = data;
 
+		debug.log('ProcessesExportController: ', vm.data);
+
 		vm.order = tables.calls.columns.calldate,
 		vm.search = '';
 		vm.filter = {
@@ -25,6 +27,11 @@
 
 		vm.exportName = 'processes';
 		// vm.exportName = $filter('date')(vm.begin, 'dd.MM.yy') + '-' + $filter('date')(vm.end, 'dd.MM.yy');
+
+		vm.filterByResult = function(actual, expected) {
+			return vm.filter.callresult ? (actual.callresult.toString() === vm.filter.callresult) : true;
+
+		};
 
 		vm.close = function(){
 			$mdDialog.hide();

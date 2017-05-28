@@ -14,7 +14,7 @@
 	<md-card flex>
 		<md-toolbar>
 			<div class="md-toolbar-tools">
-				<h2>Call Resolution Rate</h2>
+				<h2>Agents Productivity</h2>
 				<span flex></span>
 				<md-button href="#" download="call-resolution.xls" onclick="ExcellentExport.excel(this, 'performance-table', 'Category Sheet');">.xlsx</md-button>
 				<md-button href="#" download="call-resolution.csv" onclick="ExcellentExport.csv(this, 'performance-table');">.csv</md-button>
@@ -28,20 +28,26 @@
 						<tr md-row>
 							<th md-column md-order-by="operator">Agent</th>
 							<th md-column md-numeric md-order-by="perf">Call Resolution, %</th>
-							<th md-column md-numeric md-order-by="['count(*)']">Total calls</th>
+							<th md-column md-numeric md-order-by="fcr">FCR, %</th>
 							<th md-column md-numeric md-order-by="['count(callresult)']">Resolved calls</th>
-							<th md-column md-numeric md-order-by="['sum(connectTime)']">Total talk time</th>
+							<th md-column md-numeric md-order-by="['count(*)']">Total calls</th>
 							<th md-column md-numeric md-order-by="['avg(connectTime)']">Avg. talk time</th>
+							<th md-column md-numeric md-order-by="['sum(connectTime)']">Total talk time</th>
 						</tr>
 					</thead>
 					<tbody md-body>
+						<tr md-row ng-show="!crrVm.stat.length">
+							<td colspan="7">No data for period</td>
+						</tr>
+
 						<tr md-row ng-repeat="stat in crrVm.stat | orderBy: crrVm.tableSort">
 							<td md-cell>{{stat.operator}}</td>
-							<td md-cell>{{ stat.perf | number:2 }}</td>
-							<td md-cell>{{stat['count(*)']}}</td>
+							<td md-cell>{{ stat.perf | number:1 }}</td>
+							<td md-cell>{{ stat.fcr | number:1 }}</td>
 							<td md-cell>{{ stat['count(callresult)'] }}</td>
-							<td md-cell>{{stat['sum(connectTime)'] | timer}}</td>
+							<td md-cell>{{stat['count(*)']}}</td>
 							<td md-cell>{{stat['avg(connectTime)'] | timer}}</td>
+							<td md-cell>{{stat['sum(connectTime)'] | timer}}</td>
 						</tr>
 					</tbody>
 				</table>

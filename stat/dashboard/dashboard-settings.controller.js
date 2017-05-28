@@ -13,7 +13,7 @@
 		var vm = this;
 
 		vm.options = angular.copy(options, {});
-		vm.periods = ['1 hour', '1 day', '1 week', '1 month', '1 year'];
+		vm.periods = ['1 hour', '1 day', '1 week', '1 month', '6 months', '1 year'];
 		vm.intervals = ['1 minutes', '5 minutes', '10 minutes', '20 minutes', '30 minutes', '1 hour'];
 		vm.save = save;
 		vm.close = closeSettings;

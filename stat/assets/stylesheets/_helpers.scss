@@ -18,6 +18,9 @@
 .clickable {
 	cursor: pointer;
 }
+.clickable:hover {
+	background-color: #eee;
+}
 
 .no-margin {
 	margin: 0 !important;

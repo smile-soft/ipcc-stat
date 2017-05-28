@@ -39,7 +39,7 @@
                     </tr>
                 </thead>
                 <tbody md-body>
-                    <tr md-row ng-repeat="item in procExpVm.data | filter:procExpVm.search | filter:procExpVm.filter:procExpVm.tables.calls.columns.callresult | orderBy: procExpVm.order">
+                    <tr md-row ng-repeat="item in procExpVm.data | filter:procExpVm.search | filter:procExpVm.filterByResult | orderBy: procExpVm.order">
                         <td md-cell>{{::item[procExpVm.tables.calls.columns.calldate]}}</td>
                         <td md-cell>{{::item[procExpVm.tables.calls.columns.operator]}}</td>
                         <td ng-if="procExpVm.tables.calls.columns.customer_name" md-cell>{{::item[procExpVm.tables.calls.columns.customer_name]}}</td>

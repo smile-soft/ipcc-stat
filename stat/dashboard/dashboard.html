@@ -92,7 +92,31 @@
 		</stat-card>
 	</div>
 	<div layout="row" layout-wrap ng-if="dashVm.stat[kind.name].taskid.length" ng-cloak>
-		<div flex="33" flex-xs="100">
+		<div flex="25" flex-xs="100">
+			<md-card>
+				<md-card-content layout-align="center">
+					<stat-card 
+						flex 
+						title="FCR"
+						subhead="First Call Resolution, %" 
+						card-class="no-margin no-shadow"
+						model="{{dashVm.globalFcr.fcrRate | number: 1}}" 
+						prevstat="{{dashVm.prevGlobalFcr.fcrRate | diff:dashVm.globalFcr.fcrRate }}"
+						dynamics="{{dashVm.prevGlobalFcr.fcrRate | diff:dashVm.globalFcr.fcrRate:'dynamics'}}">
+					</stat-card>
+					<canvas flex id="nc-chart" class="chart chart-doughnut" ng-style="dashVm.chartOptions.layout" 
+					  chart-options="dashVm.chartOptions" chart-data="[dashVm.globalFcr.fcr, (dashVm.globalFcr.total - dashVm.globalFcr.fcr)]" chart-labels="['Resolved Calls', 'Unresolved Calls']" chart-legend="true" chart-colours="['#3F51B5', '#9E9E9E']">
+					</canvas> 
+					<ul class="chart-labels inline">
+						<li ng-repeat="label in ['Resolved Calls', 'Unresolved Calls'] track by $index">
+							<span class="chart-label-color" style="background-color: {{['#3F51B5', '#9E9E9E'][$index]}}"></span>
+							<span> {{label}}</span>
+						</li>
+					</ul>
+				</md-card-content>
+			</md-card>
+		</div>
+		<div flex="25" flex-xs="100">
 			<md-card>
 				<md-card-content layout-align="center">
 					<stat-card 
@@ -104,13 +128,19 @@
 						prevstat="{{dashVm.prevstat[kind.name].nca | diff:dashVm.stat[kind.name].nca }}"
 						dynamics="{{dashVm.prevstat[kind.name].nca | diff:dashVm.stat[kind.name].nca:'dynamics'}}">
 					</stat-card>
-					<canvas flex id="nc-chart" class="chart chart-doughnut"
-					  chart-data="[dashVm.stat[kind.name].nca, (dashVm.stat[kind.name].nco - dashVm.stat[kind.name].nca)]" chart-labels="['Number of Calls Answered', 'Not Answered Calls']" chart-legend="true" chart-colours="['#3F51B5', '#9E9E9E']">
+					<canvas flex id="nc-chart" class="chart chart-doughnut" ng-style="dashVm.chartOptions.layout" 
+					  chart-options="dashVm.chartOptions" chart-data="[dashVm.stat[kind.name].nca, (dashVm.stat[kind.name].nco - dashVm.stat[kind.name].nca)]" chart-labels="['Number of Calls Answered', 'Not Answered Calls']" chart-legend="true" chart-colours="['#3F51B5', '#9E9E9E']">
 					</canvas> 
+					<ul class="chart-labels inline">
+						<li ng-repeat="label in ['Number of Calls Answered', 'Not Answered Calls'] track by $index">
+							<span class="chart-label-color" style="background-color: {{['#3F51B5', '#9E9E9E'][$index]}}"></span>
+							<span> {{label}}</span>
+						</li>
+					</ul>
 				</md-card-content>
 			</md-card>
 		</div>
-		<div flex="33" flex-xs="100">
+		<div flex="25" flex-xs="100">
 			<md-card>
 				<md-card-content layout="column" layout-align="center">
 					<stat-card 
@@ -121,13 +151,19 @@
 						model="{{dashVm.stat[kind.name].att | average: dashVm.data[kind.name].list.length | timer }}" 
 						prevstat="{{dashVm.prevstat[kind.name].att | diff:dashVm.stat[kind.name].att }}">
 					</stat-card>
-					<canvas flex id="nc-chart" class="chart chart-doughnut"
-					  chart-data="[ (dashVm.stat[kind.name].att / (dashVm.data[kind.name].list.length || 1)).toFixed(1) , (dashVm.stat[kind.name].aht / (dashVm.data[kind.name].list.length || 1) - dashVm.stat[kind.name].att / (dashVm.data[kind.name].list.length || 1)).toFixed(1) ]" chart-labels="['Average Talk Time', 'Average Wrap Time']" chart-legend="true" chart-colours="['#3F51B5', '#9E9E9E']">
+					<canvas flex id="nc-chart" class="chart chart-doughnut" ng-style="dashVm.chartOptions.layout" 
+					  chart-options="dashVm.chartOptions" chart-data="[ (dashVm.stat[kind.name].att / (dashVm.data[kind.name].list.length || 1)).toFixed(1) , (dashVm.stat[kind.name].aht / (dashVm.data[kind.name].list.length || 1) - dashVm.stat[kind.name].att / (dashVm.data[kind.name].list.length || 1)).toFixed(1) ]" chart-labels="['Average Talk Time', 'Average Wrap Time']" chart-legend="true" chart-colours="['#3F51B5', '#9E9E9E']">
 					</canvas> 
+					<ul class="chart-labels inline">
+						<li ng-repeat="label in ['Average Talk Time', 'Average Wrap Time'] track by $index">
+							<span class="chart-label-color" style="background-color: {{['#3F51B5', '#9E9E9E'][$index]}}"></span>
+							<span> {{label}}</span>
+						</li>
+					</ul>
 				</md-card-content>
 			</md-card>
 		</div>
-		<div flex="33" flex-xs="100" ng-if="dashVm.options.callstable.columns.login">
+		<div flex="25" flex-xs="100" ng-if="dashVm.options.callstable.columns.login">
 			<md-card>
 				<md-card-content layout="column" layout-align="center">
 					<stat-card 
@@ -137,21 +173,30 @@
 						card-class="no-margin no-shadow"
 						model="{{ (dashVm.stat[kind.name].ncu / dashVm.stat[kind.name].nco * 100) | number: 0 }}" >
 					</stat-card>
-					<canvas flex id="nc-chart" class="chart chart-doughnut"
-					  chart-data="[ dashVm.stat[kind.name].ncu, (dashVm.stat[kind.name].nco - dashVm.stat[kind.name].ncu) ]" chart-labels="['Number of Calls from Users', 'Number of Calls Offered']" chart-legend="true" chart-colours="['#3F51B5', '#9E9E9E']">
-					</canvas> 
+					<canvas flex id="nc-chart" class="chart chart-doughnut" ng-style="dashVm.chartOptions.layout" 
+					 chart-options="dashVm.chartOptions" chart-data="[ dashVm.stat[kind.name].ncu, (dashVm.stat[kind.name].nco - dashVm.stat[kind.name].ncu) ]" chart-labels="['Number of Calls from Users', 'Number of Calls Offered']" chart-legend="true" chart-colours="['#3F51B5', '#9E9E9E']">
+					</canvas>
+					<ul class="chart-labels inline">
+						<li ng-repeat="label in ['Number of Calls from Users', 'Number of Calls Offered'] track by $index">
+							<span class="chart-label-color" style="background-color: {{['#3F51B5', '#9E9E9E'][$index]}}"></span>
+							<span> {{label}}</span>
+						</li>
+					</ul>
 				</md-card-content>
 			</md-card>
 		</div>
 	</div>
 
 </section>
-<section class="default-background">
+<section class="default-background" ng-if="dashVm.options.cattable">
 	<div layout layout-align="center stretch" layout-wrap layout-fill>
 		<md-card flex="100">
 			<md-toolbar>
 				<div class="md-toolbar-tools">
 					<h2 ng-if="dashVm.selectedCat">
+						<md-button ng-if="dashVm.selectedCat" class="md-icon-button" ng-click="dashVm.onCatSelect(dashVm.selectedCat)" aria-label="Cancel selection">
+							<i class="material-icons">close</i>
+						</md-button>
 						<span>{{dashVm.selectedCat[dashVm.options.cattable.columns.description]}} selected</span>
 					</h2>
 					<h2 ng-if="!dashVm.selectedCat">
@@ -160,14 +205,11 @@
 			        <span flex></span>
 			        <md-button href="#" download="categories.xls" onclick="ExcellentExport.excel(this, 'category-table', 'Category Sheet');">.xlsx</md-button>
 			        <md-button href="#" download="categories.csv" onclick="ExcellentExport.csv(this, 'category-table');">.csv</md-button>
-					<md-button ng-if="dashVm.selectedCat" class="md-icon-button" ng-click="dashVm.onCatSelect(dashVm.selectedCat)" aria-label="Cancel selection">
-						<i class="material-icons">close</i>
-					</md-button>
 				</div>
 			</md-toolbar>
 			<spinner name="categories-loader"><md-progress-linear md-mode="indeterminate"></md-progress-linear></spinner>
 			<md-card-content layout="row" layout-wrap>
-				<md-table-container flex="70" flex-xs="100" flex-order="1">
+				<md-table-container flex="80" flex-xs="100" flex-order="1">
 					<table md-table id="category-table">
 						<thead md-head md-order="dashVm.options.catorder">
 							<tr md-row>
@@ -185,6 +227,14 @@
 							</tr>
 						</thead>
 						<tbody md-body>
+							<tr md-row ng-show="!dashVm.catstat.length">
+								<td colspan="10">No data for period</td>
+							</tr>
+
+							<tr md-row ng-show="dashVm.selectedCat && !dashVm.subCatsStat.length">
+								<td colspan="10">No data for period</td>
+							</tr>
+
 							<tr md-row ng-if="dashVm.selectedCat" class="default-background">
 								<td md-cell>{{::dashVm.selectedCat[dashVm.options.cattable.columns.description]}}</td>
 								<td md-cell>{{::dashVm.selectedCat['sl'+dashVm.data.Incoming_Agent.sl] | number: 0}}</td>
@@ -225,16 +275,22 @@
 						</tbody>
 					</table>
 				</md-table-container>
-				<div layout layout-wrap layout-fill layout-margin layout-align="center start" flex="100" flex-gt-xs="30" flex-order="2" flex-order-xs="-1">
+				<div layout layout-wrap layout-fill layout-margin layout-align="center start" flex="100" flex-gt-xs="20" flex-order="2" flex-order-xs="-1">
 					<md-input-container flex="100">
 						<label>Metric</label>
 						<md-select ng-model="dashVm.catchartLabel" placeholder="Metric">
 					    	<md-option ng-value="item.index" ng-repeat="item in dashVm.catMetrics">{{item.name}}</md-option>
 						</md-select>
 					</md-input-container>
-					<canvas flex="100" id="cat-chart" class="chart chart-pie"
-					  chart-data="dashVm.catchartData.data" chart-labels="dashVm.catchartData.labels" chart-legend="true" chart-colours="dashVm.catchartData.colours">
+					<canvas flex="100" id="cat-chart" class="chart chart-pie" ng-style="dashVm.chartOptions.layout" 
+					  chart-options="dashVm.chartOptions" chart-data="dashVm.catchartData.data" chart-labels="dashVm.catchartData.labels" chart-legend="true" chart-colors="dashVm.catchartData.colours">
 					</canvas>
+					<ul class="chart-labels">
+						<li ng-repeat="label in dashVm.catchartData.labels track by $index">
+							<span class="chart-label-color" style="background-color: {{dashVm.catchartData.colours[$index]}}"></span>
+							<span> {{label}}</span>
+						</li>
+					</ul>
 				</div>
 			</md-card-content>
 		</md-card>

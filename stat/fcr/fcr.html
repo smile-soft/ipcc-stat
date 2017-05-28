@@ -1,0 +1,175 @@
+<section layout="column" layout-gt-xs="row" layout-padding layout-align="start center">
+	<div layout layout-align="center" layout-align-gt-xs="start center" layout-wrap>
+		<md-datepicker ng-model="fcrVm.begin" md-max-date="fcrVm.end"></md-datepicker>
+		<md-datepicker ng-model="fcrVm.end" md-min-date="fcrVm.begin"></md-datepicker>
+		<md-button hide-xs class="md-primary" ng-click="fcrVm.getFcr()" aria-label="Update Statistics">Update</md-button>		
+	</div>
+	<span flex></span>
+	<div layout layout-align="end center" flex>
+		<md-button class="md-icon-button md-primary" ng-click="fcrVm.openSettings($event)" aria-label="Open FCR Settings"><md-icon>settings</md-icon></md-button>
+	</div>
+</section>
+<md-divider layout flex></md-divider>
+<section layout>
+	<md-card flex layout-align="start">
+		<md-toolbar>
+			<div class="md-toolbar-tools">
+				<h2 ng-if="fcrVm.selectedCat !== null">
+					<md-button class="md-icon-button" ng-click="fcrVm.selectedCat = null; fcrVm.selectedSubcat = null; fcrVm.subcatFcr = []; fcrVm.getAgentFcr()" aria-label="Cancel selection">
+						<i class="material-icons">close</i>
+					</md-button>
+					<span>{{fcrVm.selectedCat}}</span>
+					<span ng-if="fcrVm.selectedSubcat !== null"> > {{fcrVm.selectedSubcat}}</span>
+				</h2>
+				<h2 ng-if="fcrVm.selectedCat === null">Categories FCR</h2>
+				<span flex></span>
+				<md-button href="#" download="Categories FCR.xls" onclick="ExcellentExport.excel(this, 'fcr-cat-table', 'Category Sheet');">.xlsx</md-button>
+				<md-button href="#" download="Categories FCR.csv" onclick="ExcellentExport.csv(this, 'fcr-cat-table');">.csv</md-button>
+			</div>
+		</md-toolbar>
+		<spinner name="cat-fcr-loader" show="false"><md-progress-linear md-mode="indeterminate"></md-progress-linear></spinner>
+		<md-card-content layout="row" layout-align="start" layout-wrap>
+			<md-table-container flex>
+				<!-- <canvas flex="100" id="cat-fcr-chart" class="chart chart-bar"
+				  chart-data="fcrVm.catChartData.data" chart-labels="fcrVm.catChartData.labels" chart-colours="fcrVm.catChartData.colours" chart-series="['FCR']">
+				</canvas> -->
+				<table md-table id="fcr-cat-table">
+					<thead md-head md-order="fcrVm.tableSort">
+						<tr md-row>
+							<th md-column ng-if="fcrVm.selectedCat === null" md-order-by="catdesc">Category</th>
+							<th md-column ng-if="fcrVm.selectedCat !== null" md-order-by="catdesc">Subcategory</th>
+							<th md-column md-numeric md-order-by="fcrRate">FCR, %</th>
+							<th md-column md-numeric md-order-by="fcr">Resolved Calls</th>
+							<th md-column md-numeric md-order-by="total">Total Calls</th>
+						</tr>
+					</thead>
+					<tbody md-body ng-cloak>
+						<!-- Show if no categories data -->
+						<tr md-row ng-show="!fcrVm.catFcr.length">
+							<td colspan="4">No data for period</td>
+						</tr>
+
+						<!-- Show total stat for selected categories -->
+						<tr md-row ng-if="fcrVm.catFcr.length && fcrVm.selectedCat === null">
+							<td md-cell>Total</td>
+							<td md-cell>{{ fcrVm.countFcr(fcrVm.totalCatFcr).fcrRate | number:1 }}</td>
+							<td md-cell>{{ fcrVm.totalCatFcr.fcr }}</td>
+							<td md-cell>{{ fcrVm.totalCatFcr.total }}</td>
+						</tr>
+
+						<!-- List of categories stat -->
+						<tr md-row ng-if="fcrVm.selectedCat === null" ng-repeat="cat in fcrVm.catFcr | orderBy: fcrVm.tableSort" ng-click="fcrVm.onCatSelect(cat.catdesc)" class="clickable">
+							<td md-cell>{{cat.catdesc}}</td>
+							<td md-cell>{{ cat.fcrRate | number:1 }}</td>
+							<td md-cell>{{ cat.fcr }}</td>
+							<td md-cell>{{ cat.total }}</td>
+						</tr>
+
+						<!-- Show if no subcategories data -->
+						<tr md-row ng-show="fcrVm.selectedCat !== null && !fcrVm.subcatFcr.length">
+							<td colspan="4">No data for period</td>
+						</tr>
+
+						<!-- Show total stat for selected subcategories -->
+						<tr md-row ng-if="fcrVm.subcatFcr.length && fcrVm.selectedCat !== null">
+							<td md-cell>Total</td>
+							<td md-cell>{{ fcrVm.countFcr(fcrVm.totalSubcatFcr).fcrRate | number:1 }}</td>
+							<td md-cell>{{ fcrVm.totalSubcatFcr.fcr }}</td>
+							<td md-cell>{{ fcrVm.totalSubcatFcr.total }}</td>
+						</tr>
+
+						<tr md-row ng-if="fcrVm.selectedCat !== null" ng-repeat="subcat in fcrVm.subcatFcr | orderBy: fcrVm.tableSort" ng-click="fcrVm.onSubcatSelect(subcat.probdesc)" class="clickable">
+							<td md-cell>{{subcat.probdesc}}</td>
+							<td md-cell>{{ subcat.fcrRate | number:1 }}</td>
+							<td md-cell>{{ subcat.fcr }}</td>
+							<td md-cell>{{ subcat.total }}</td>
+						</tr>
+					</tbody>
+				</table>
+			</md-table-container>
+		</md-card-content>
+	</md-card>
+	<!-- <md-card flex>
+		<md-toolbar>
+			<div class="md-toolbar-tools">
+				<h2>Subcategories FCR</h2>
+				<span flex></span>
+				<md-button href="#" download="Subcategories FCR.xls" onclick="ExcellentExport.excel(this, 'fcr-subcat-table', 'Subcategory Sheet');">.xlsx</md-button>
+				<md-button href="#" download="Subcategories FCR.csv" onclick="ExcellentExport.csv(this, 'fcr-subcat-table');">.csv</md-button>
+			</div>
+		</md-toolbar>
+		<spinner name="fcr-loader" show="true"><md-progress-linear md-mode="indeterminate"></md-progress-linear></spinner>
+		<md-card-content layout="row" layout-wrap>
+			<md-table-container flex>
+				<table md-table id="fcr-subcat-table">
+					<thead md-head md-order="fcrVm.tableSort">
+						<tr md-row>
+							<th md-column md-order-by="catdesc">Subcategory</th>
+							<th md-column md-numeric md-order-by="fcr">FCR</th>
+							<th md-column md-numeric md-order-by="total">Total</th>
+							<th md-column md-numeric md-order-by="fcrRate">FCR, %</th>
+						</tr>
+					</thead>
+					<tbody md-body>
+						<tr md-row ng-repeat="subcat in fcrVm.subcatFcr | orderBy: fcrVm.tableSort" ng-click="fcrVm.onSubcatSelect(subcat.catdesc)">
+							<td md-cell>{{subcat.probdesc}}</td>
+							<td md-cell>{{ subcat.fcr }}</td>
+							<td md-cell>{{ subcat.total }}</td>
+							<td md-cell>{{ subcat.fcrRate | number:1 }}</td>
+						</tr>
+					</tbody>
+				</table>
+			</md-table-container>
+		</md-card-content>
+	</md-card> -->
+	<md-card flex layout-align="start">
+		<md-toolbar>
+			<div class="md-toolbar-tools">
+				<h2>Agents FCR</h2>
+				<span flex></span>
+				<md-button href="#" download="Agents FCR.xls" onclick="ExcellentExport.excel(this, 'fcr-agents-table', 'Category Sheet');">.xlsx</md-button>
+				<md-button href="#" download="Agents FCR.csv" onclick="ExcellentExport.csv(this, 'fcr-agents-table');">.csv</md-button>
+			</div>
+		</md-toolbar>
+		<spinner name="agents-fcr-loader" show="false"><md-progress-linear md-mode="indeterminate"></md-progress-linear></spinner>
+		<md-card-content layout="row" layout-wrap>
+			<md-table-container flex>
+				<!-- <canvas flex="100" id="agents-fcr-chart" class="chart chart-bar"
+				  chart-data="fcrVm.aChartData.data" chart-labels="fcrVm.aChartData.labels" chart-colours="fcrVm.aChartData.colours" chart-series="['FCR']">
+				</canvas> -->
+				<table md-table id="fcr-agents-table">
+					<thead md-head md-order="fcrVm.tableSort">
+						<tr md-row>
+							<th md-column md-order-by="agent">Agent</th>
+							<th md-column md-numeric md-order-by="fcrRate">FCR, %</th>
+							<th md-column md-numeric md-order-by="fcr">Resolved Calls</th>
+							<th md-column md-numeric md-order-by="total">Total Calls</th>
+						</tr>
+					</thead>
+					<tbody md-body>
+
+						<!-- Show if no data -->
+						<tr md-row ng-show="!fcrVm.agentsFcr.length">
+							<td colspan="4">No data for period</td>
+						</tr>
+
+						<!-- Show total stat for agents -->
+						<!-- <tr md-row ng-if="fcrVm.agentsFcr.length">
+							<td md-cell>Total</td>
+							<td md-cell>{{ fcrVm.countFcr(fcrVm.totalAgentsFcr).fcrRate | number:1 }}</td>
+							<td md-cell>{{ fcrVm.totalAgentsFcr.fcr }}</td>
+							<td md-cell>{{ fcrVm.totalAgentsFcr.total }}</td>
+						</tr> -->
+
+						<tr md-row ng-repeat="agent in fcrVm.agentsFcr | orderBy: fcrVm.tableSort">
+							<td md-cell>{{agent.agent}}</td>
+							<td md-cell>{{ agent.fcrRate | number:1 }}</td>
+							<td md-cell>{{ agent.fcr }}</td>
+							<td md-cell>{{ agent.total }}</td>
+						</tr>
+					</tbody>
+				</table>
+			</md-table-container>
+		</md-card-content>
+	</md-card>
+</section>

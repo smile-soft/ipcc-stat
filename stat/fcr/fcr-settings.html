@@ -1,0 +1,55 @@
+<md-dialog flex="auto" aria-label="FCR settings">
+    <md-toolbar>
+        <div class="md-toolbar-tools">
+            <h2>FCR settings</h2>
+            <span flex></span>
+            <md-button class="md-icon-button" ng-click="fcrSettsVm.close()">
+                <i class="material-icons">close</i>
+            </md-button>
+        </div>
+    </md-toolbar>
+    <md-dialog-content>
+        <div layout="column" layout-gt-xs="row" layout-padding>
+            <div flex>
+                <md-subheader>Tasks</md-subheader>
+                <md-list>
+                    <md-checkbox ng-model="fcrSettsVm.allTasksSelected" ng-change="fcrSettsVm.selectAllTasks()" aria-label="Select All Tasks">
+                            Select All
+                    </md-checkbox>
+                    <md-list-item ng-repeat="item in fcrSettsVm.tasks">
+                        <md-checkbox ng-checked="fcrSettsVm.exists(item, fcrSettsVm.selectedTasks)" ng-click="fcrSettsVm.toggle(item, fcrSettsVm.selectedTasks)" aria-label="Selected tasks">
+                        </md-checkbox>
+                        {{item}}
+                    </md-list-item>
+                </md-list>
+            </div>
+            <div flex>
+                <md-subheader>Categories</md-subheader>
+                <md-list>
+                    <md-checkbox ng-model="fcrSettsVm.allCatsSelected" ng-change="fcrSettsVm.selectAllCats()" aria-label="Select All Categories">
+                            Select All
+                    </md-checkbox>
+                    <md-list-item ng-repeat="cat in fcrSettsVm.cats" ng-click="fcrSettsVm.showSubcats(cat.id)">
+                        <md-checkbox ng-checked="fcrSettsVm.exists(cat.id, fcrSettsVm.selectedCats)" ng-click="fcrSettsVm.selectCat(cat.id, fcrSettsVm.exists(cat.id, fcrSettsVm.selectedCats))" aria-label="Selected categories">
+                        </md-checkbox>
+                        {{cat.desc}}
+                    </md-list-item>
+                </md-list>
+            </div>
+            <div flex>
+                <md-subheader>Subcategories</md-subheader>
+                <md-list>
+                    <md-list-item ng-repeat="subcat in fcrSettsVm.subcats" ng-if="subcat.catid === fcrSettsVm.selectedCat">
+                        <md-checkbox ng-checked="fcrSettsVm.exists(subcat.id, fcrSettsVm.selectedSubcats)" ng-click="fcrSettsVm.toggle(subcat.id, fcrSettsVm.selectedSubcats)" aria-label="Selected subcategories">
+                        </md-checkbox>
+                        {{subcat.desc}}
+                    </md-list-item>
+                </md-list>
+            </div>
+        </div>
+    </md-dialog-content>
+    <md-dialog-actions>
+        <md-button class="md-primary" aria-label="Save" ng-click="fcrSettsVm.save()">Submit</md-button>
+        <md-button ng-click="fcrSettsVm.close()">Close</md-button>
+    </md-dialog-actions>
+</md-dialog>

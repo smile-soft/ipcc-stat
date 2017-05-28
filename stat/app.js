@@ -4,5 +4,6 @@ angular.module('app', [
 	'app.routes',
 	'app.layout',
 	'app.crr',
+	'app.fcr',
 	'app.dashboard'
 ]);
