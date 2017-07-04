@@ -46,8 +46,8 @@
                         <td md-cell>{{::item[procExpVm.tables.calls.columns.customer_phone]}}</td>
                         <td ng-if="procExpVm.tables.calls.columns.company" md-cell>{{::item[procExpVm.tables.companies.columns.description]}}</td>
                         <td md-cell>{{::item[procExpVm.tables.calls.columns.comments]}}</td>
-                        <td ng-if="item[procExpVm.tables.calls.columns.callresult] === 1" md-cell>+</td>
-                        <td ng-if="item[procExpVm.tables.calls.columns.callresult] === 0" md-cell>-</td>
+                        <td ng-if="item[procExpVm.tables.calls.columns.callresult] == 1" md-cell>+</td>
+                        <td ng-if="item[procExpVm.tables.calls.columns.callresult] == 0" md-cell>-</td>
                     </tr>
                 </tbody>
             </table>

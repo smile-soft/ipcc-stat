@@ -6,9 +6,9 @@
 		.module('app.crr')
 		.controller('CrrController', CrrController);
 
-	CrrController.$inject = ['$rootScope', '$mdDialog', 'SettingsService', 'apiService', 'TasksService', 'utilsService', 'debugService', 'spinnerService', 'errorService'];
+	CrrController.$inject = ['$rootScope', '$mdDialog', 'SettingsService', 'apiService', 'store', 'TasksService', 'utilsService', 'debugService', 'spinnerService', 'errorService'];
 
-	function CrrController($rootScope, $mdDialog, SettingsService, api, TasksService, utils, debug, spinnerService, errorService) {
+	function CrrController($rootScope, $mdDialog, SettingsService, api, store, TasksService, utils, debug, spinnerService, errorService) {
 
 		var vm = this;
 		var defaultOptions = {
@@ -27,6 +27,7 @@
 		vm.getCallResolution = getCallResolution;
 		vm.openSettings = openSettings;
 		vm.tableSort = '-perf';
+		vm.data = store.get('data');
 
 		init();
 		spinnerService.hide('main-loader');
@@ -35,12 +36,13 @@
 			SettingsService.getSettings()
 			.then(function(dbSettings){
 				vm.settings = dbSettings;
-				return TasksService.getTaskList(1);
+				return getTaskList(vm.data);
+				// return TasksService.getTaskList(1);
 			})
 			.then(function(tasks) {
-				debug.log('tasks: ', tasks.data.result);
-				vm.tasks = tasks.data.result;
-				vm.selectedTasks = tasks.data.result;
+				debug.log('tasks: ', tasks);
+				vm.tasks = tasks;
+				vm.selectedTasks = tasks;
 			})
 			.then(getCallResolution)
 			.catch(errorService.show);
@@ -76,12 +78,13 @@
 			})
 			.then(function(pstat) {
 				debug.log('getPerfStat data: ', pstat.data.result);
+				debug.log('selectedTasks: ', vm.selectedTasks);
 				perfStat = pstat.data.result;
 				vm.stat = angular.merge([], agentStat, perfStat);
 				vm.stat.map(addPerfValue);
 
 				return api.getFCRStatistics({
-					task: vm.tasks[0],
+					task: vm.selectedTasks,
 					table: [tables.calls.name],
 					procid: [tables.calls.name, tables.calls.columns.process_id].join('.'),
 					interval: 3600*24*1000,
@@ -140,6 +143,14 @@
 			var currFcr = agentsFcr[item.operator];
 			item.fcr = currFcr !== undefined ? (currFcr.fcr / currFcr.total * 100) : null;
 			return item;
+		}
+
+		function getTaskList(data) {
+			var tasks = [];
+			Object.keys(data).forEach(function(item) {
+				tasks = tasks.concat(data[item].tasks);
+			});
+			return tasks;
 		}
 
 		function arrayToObject(array, propName) {

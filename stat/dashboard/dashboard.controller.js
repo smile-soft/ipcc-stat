@@ -32,6 +32,13 @@
 				list: [],
 				metrics: ['aht', 'att', 'nco', 'nca']
 			},
+			Callback_Agent: {
+				kind: 257,
+				tasks: [],
+				list: [],
+				sl: 20,
+				metrics: ['aht', 'att', 'nco', 'nca', 'car', 'asa']
+			},
 			defaults: {
 				tasks: [],
 				list: [],
@@ -44,7 +51,7 @@
 			autoupdate: false,
 			updateEvery: '1 minutes',
 			kinds: [{name: 'Incoming_Agent', kind: 1}],
-			kindsList: [{name: 'Incoming_Agent', kind: 1}, {name: 'Messaging_Chat', kind: 7}, {name: 'Autodial_Agent', kind: 129}],
+			kindsList: [{name: 'Incoming_Agent', kind: 1}, {name: 'Messaging_Chat', kind: 7}, {name: 'Autodial_Agent', kind: 129}, {name: 'Callback_Agent', kind: 257}],
 			// kinds: [1, 7, 129],
 			sl: [5, 10, 15, 20, 25, 30, 35, 40],
 			db: {},
@@ -146,7 +153,7 @@
 				})
 				.then(function(){
 					if(vm.options.callstable && vm.options.callstable.columns.callresult) {
-						return getCallResolutionStat();
+						return getCallResolutionStat(item);
 					} else {
 						return $q.defer().resolve();
 					}
@@ -154,24 +161,28 @@
 				.then(function() {
 					if(vm.options.callstable && vm.options.callstable.columns.login) {
 						debug.log('vm.options.callstable.columns.login: ', vm.options.callstable.columns.login);
-						return getLoginsRatio();
+						return getLoginsRatio(item);
 					} else {
 						return $q.defer().resolve();
 					}
 				})
+				// .then(function() {
+				// 	if(vm.options.cattable) {
+				// 		return getCategoriesStat();
+				// 	} else {
+				// 		return $q.defer().resolve();
+				// 	}
+				// })
 				.then(function() {
-					if(vm.options.cattable) {
-						return getCategoriesStat();
-					} else {
-						return $q.defer().resolve();
-					}
+					getGlobalFrc(item, 'init');
 				})
-				.then(getGlobalFrc)
 				.then(function(){
 					if(index === array.length-1) spinnerService.hide('main-loader');
 				})
 				.catch(errorService.show);
 			});
+
+			if(vm.options.cattable) getCategoriesStat();
 		}
 
 		function autoUpdate(){
@@ -189,7 +200,7 @@
 				getStatData(vm.data[item.name].list, item)
 				.then(function(){
 					if(vm.options.callstable && vm.options.callstable.columns.callresult) {
-						return getCallResolutionStat();
+						return getCallResolutionStat(item);
 					} else {
 						return $q.defer().resolve();
 					}
@@ -197,12 +208,14 @@
 				.then(function() {
 					if(vm.options.callstable && vm.options.callstable.columns.login) {
 						debug.log('vm.options.callstable.columns.login: ', vm.options.callstable.columns.login);
-						return getLoginsRatio();
+						return getLoginsRatio(item);
 					} else {
 						return $q.defer().resolve();
 					}
 				})
-				.then(getGlobalFrc)
+				.then(function() {
+					getGlobalFrc(item, 'getStat');
+				})
 				.then(function(){ spinnerService.hide(item.name+'-loader'); })
 				.catch(function(){ spinnerService.hide(item.name+'-loader'); });
 			});
@@ -426,6 +439,8 @@
 				vm.data[fkind].tasks = [].concat(tasks);
 				if(!vm.data[fkind].list.length) vm.data[fkind].list = [].concat(tasks);
 
+				store.set('data', vm.data);
+
 				resolve(tasks);
 			});
 		}
@@ -536,8 +551,8 @@
 			});
 		}
 
-		function getCallResolutionStat(){
-			var data, tables = vm.options.db.tables, taskKind = 1,
+		function getCallResolutionStat(kind){
+			var data, tables = vm.options.db.tables, taskKind = kind.kind,
 			metrics = ['count(callresult)'];
 
 			return api.getCustomListStatistics({
@@ -561,15 +576,16 @@
 			});
 		}
 
-		function getGlobalFrc() {
+		function getGlobalFrc(kind, func) {
 			var tables = vm.options.db.tables,
-				taskKind = 1,
+				taskKind = kind.kind,
 				tasks = getTaskIds([taskKind]);
 
-			debug.log('getGlobalFrc tasks:', tasks[0]);
+			debug.log('getGlobalFrc tasks:', kind, func);
 
 			return api.getCustomFCRStatistics({
-				task: tasks[0],
+				task: tasks,
+				// task: tasks[0],
 				// table: [tables.calls.name],
 				// procid: tables.calls.columns.process_id,
 				interval: 3600*24*1000,
@@ -577,16 +593,16 @@
 				end: vm.end.valueOf()
 			})
 			.then(function(result) {
-				vm.globalFcr = result.data.result.length ? (result.data.result
+				vm.globalFcr[kind.name] = result.data.result.length ? (result.data.result
 				.reduce(utils.extendAndSum)) : [];
 				
-				vm.globalFcr.fcrRate = vm.globalFcr.fcr / vm.globalFcr.total * 100;
+				vm.globalFcr[kind.name].fcrRate = vm.globalFcr[kind.name].fcr / vm.globalFcr[kind.name].total * 100;
 
 				debug.log('getGlobalFrc: ', vm.globalFcr);
 
 				// get prev statistics
 				return api.getCustomFCRStatistics({
-					task: tasks[0],
+					task: tasks,
 					// table: [tables.calls.name],
 					// procid: tables.calls.columns.process_id,
 					interval: 3600*24*1000,
@@ -596,17 +612,17 @@
 
 			})
 			.then(function(result) {
-				vm.prevGlobalFcr = result.data.result.length ? (result.data.result
+				vm.prevGlobalFcr[kind.name] = result.data.result.length ? (result.data.result
 				.reduce(utils.extendAndSum)) : [];
 				
-				vm.prevGlobalFcr.fcrRate = vm.prevGlobalFcr.fcr / vm.prevGlobalFcr.total * 100;
+				vm.prevGlobalFcr[kind.name].fcrRate = vm.prevGlobalFcr[kind.name].fcr / vm.prevGlobalFcr[kind.name].total * 100;
 
 				debug.log('prevGlobalFcr: ', vm.prevGlobalFcr);
 			})
 		}
 
-		function getLoginsRatio() {
-			var data, tables = vm.options.db.tables, taskKind = 1,
+		function getLoginsRatio(kind) {
+			var data, tables = vm.options.db.tables, taskKind = kind.kind,
 			rdata = {},
 			metrics = ['count(login)'];
 			// metrics = ['count(case when login != 0 then login else null end) as tlogins'];
@@ -722,6 +738,10 @@
 			} else {
 				return ids;
 			}
+		}
+
+		function arrayToIn(array) {
+			return "('" + array.join("','") + "')";
 		}
 
 	}

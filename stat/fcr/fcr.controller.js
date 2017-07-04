@@ -18,6 +18,7 @@
 		var catFcr = {};
 		var subcatFcr = {};
 		var agentsFcr = {};
+		var withSubcats = true;
 
 		vm.settings = {};
 		vm.tasks = [];
@@ -44,6 +45,7 @@
 		vm.onCatSelect = onCatSelect;
 		vm.onSubcatSelect = onSubcatSelect;
 		vm.countFcr = countFcr;
+		vm.data = store.get('data');
 
 		init();
 		spinnerService.show('main-loader');
@@ -52,12 +54,16 @@
 			SettingsService.getSettings()
 			.then(function(dbSettings){
 				vm.settings = dbSettings;
-				return TasksService.getTaskList(1);
+				if(!vm.settings.tables.subcategories.columns.category_id) 
+					withSubcats = false;
+
+				// return TasksService.getTaskList(1);
+				return getTaskList(vm.data);
 			})
 			.then(function(tasks) {
-				debug.log('tasks: ', tasks.data.result);
-				vm.tasks = tasks.data.result;
-				vm.selectedTasks = store.get('selectedTasks') || tasks.data.result;
+				debug.log('tasks: ', tasks);
+				vm.tasks = tasks;
+				vm.selectedTasks = store.get('selectedTasks') || tasks;
 				vm.selectedCats = store.get('selectedCats') || [];
 				vm.selectedSubcats = store.get('selectedSubcats') || [];
 
@@ -68,7 +74,15 @@
 				});
 			})
 			.then(getCategories)
-			.then(getSubcategories)
+			.then(function() {
+				if(withSubcats) {
+					return getSubcategories();
+				} else {
+					return $q(function(resolve, reject) {
+						resolve();
+					});
+				}
+			})
 			.then(getFcr)
 			.catch(errorService.show);
 		}
@@ -122,7 +136,7 @@
 			return api.getQueryResultSet({
 				tables: [tables.categories.name],
 				columns: [tables.categories.columns.description, tables.categories.columns.id],
-				groupBy: tables.categories.columns.description
+				groupBy: [tables.categories.columns.description, tables.categories.columns.id].join(',')
 			}).then(function(cats){
 				vm.cats = cats.data.result.length ? (cats.data.result.map(function(cat) { return { desc: cat[0], id: cat[1] } })) : [];
 				vm.selectedCats = vm.selectedCats.length ? vm.selectedCats : [].concat(vm.cats).map(function(item) { return item.id });
@@ -139,7 +153,8 @@
 				tables: [tables.categories.name, tables.subcategories.name],
 				columns: [tables.categories.columns.description, tables.categories.name+'.'+tables.categories.columns.id, tables.subcategories.columns.description, tables.subcategories.columns.id],
 				tabrel: tables.subcategories.name+'.'+tables.subcategories.columns.category_id+'='+tables.categories.name+'.'+tables.categories.columns.id,
-				groupBy: [tables.categories.columns.description, tables.subcategories.columns.description]
+				groupBy: [tables.categories.columns.description, tables.categories.name+'.'+tables.categories.columns.id, tables.subcategories.columns.description, tables.subcategories.columns.id].join(',')
+				// groupBy: [tables.categories.columns.description, tables.subcategories.columns.description]
 			}).then(function(subcats){
 				debug.log('getSubcategories: ', subcats);
 				vm.subcats = subcats.data.result.length ? (subcats.data.result.map(function(subcat) { return { catid: subcat[1], desc: subcat[2], id: subcat[3] } })) : [];
@@ -152,7 +167,7 @@
 		function getAgentFcr() {
 			var tables = vm.settings.tables;
 			var opts = {
-				task: vm.tasks[0],
+				task: vm.selectedTasks,
 				table: [tables.calls.name],
 				procid: [tables.calls.name, tables.calls.columns.process_id].join('.'),
 				interval: 3600*24*1000,
@@ -171,7 +186,8 @@
 			opts.table.push(tables.categories.name, tables.subcategories.name);
 			opts.where = [tables.calls.name, tables.calls.columns.category].join('.')+'='+ [tables.categories.name, tables.categories.columns.id].join('.');
 			opts.where += ' and ' + [tables.calls.name, tables.calls.columns.subcategory].join('.')+'='+ [tables.subcategories.name, tables.subcategories.columns.id].join('.');
-			opts.where += ' and ' + [tables.subcategories.name, tables.subcategories.columns.id].join('.')+' in '+arrayToIn(vm.selectedSubcats);
+			if(withSubcats)
+				opts.where += ' and ' + [tables.subcategories.name, tables.subcategories.columns.id].join('.')+' in '+arrayToIn(vm.selectedSubcats);
 
 			// if category selected 
 			if(vm.selectedCat !== null) {
@@ -214,12 +230,12 @@
 
 			var tables = vm.settings.tables,
 				params = {
-					task: vm.selectedTasks[0],
+					task: vm.selectedTasks,
 					table: [tables.calls.name, tables.categories.name, tables.subcategories.name],
 					where: [tables.calls.name, tables.calls.columns.category].join('.')+'='+[tables.categories.name, tables.categories.columns.id].join('.') +
 							' and ' + [tables.calls.name, tables.calls.columns.subcategory].join('.')+'='+[tables.subcategories.name, tables.subcategories.columns.id].join('.') +
 							' and ' + [tables.categories.name, tables.categories.columns.id].join('.')+' in '+arrayToIn(vm.selectedCats) +
-							' and ' + [tables.subcategories.name, tables.subcategories.columns.id].join('.')+' in '+arrayToIn(vm.selectedSubcats),
+							(withSubcats ? ' and ' + [tables.subcategories.name, tables.subcategories.columns.id].join('.')+' in '+arrayToIn(vm.selectedSubcats) : ''),
 					procid: tables.calls.columns.process_id,
 					column: [tables.categories.columns.description, tables.subcategories.columns.description],
 					interval: defaultOptions.interval,
@@ -231,7 +247,7 @@
 
 			return api.getCustomFCRStatistics(params)
 			.then(function(result) {
-				catFcr = arrayToObjectAndSum(result.data.result, 'catdesc');
+				catFcr = arrayToObjectAndSum(result.data.result, tables.categories.columns.description);
 				vm.catFcr = Object.keys(catFcr)
 				.map(function(key) {
 					return catFcr[key];
@@ -259,7 +275,7 @@
 			spinnerService.show('cat-fcr-loader');
 
 			return api.getCustomFCRStatistics({
-				task: vm.selectedTasks[0],
+				task: vm.selectedTasks,
 				table: [tables.calls.name, tables.categories.name, tables.subcategories.name],
 				where: [tables.categories.name, tables.categories.columns.description].join('.') + '=\'' + vm.selectedCat + '\' and ' +
 						[tables.calls.name, tables.calls.columns.category].join('.')+'='+[tables.categories.name, tables.categories.columns.id].join('.') + ' and ' +
@@ -306,6 +322,14 @@
 			return obj
 		}
 
+		function getTaskList(data) {
+			var tasks = [];
+			Object.keys(data).forEach(function(item) {
+				tasks = tasks.concat(data[item].tasks);
+			});
+			return tasks;
+		}
+
 		function arrayToObjectAndSum(array, propName) {
 			if(!array.length) return array;
 
@@ -319,7 +343,7 @@
 		}
 
 		function arrayToIn(array) {
-			return '("' + array.join('","') + '")';
+			return "('" + array.join("','") + "')";
 		}
 
 		function sumObjects() {

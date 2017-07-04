@@ -154,12 +154,12 @@
 						</tr>
 
 						<!-- Show total stat for agents -->
-						<!-- <tr md-row ng-if="fcrVm.agentsFcr.length">
+						<tr md-row ng-if="fcrVm.agentsFcr.length">
 							<td md-cell>Total</td>
 							<td md-cell>{{ fcrVm.countFcr(fcrVm.totalAgentsFcr).fcrRate | number:1 }}</td>
 							<td md-cell>{{ fcrVm.totalAgentsFcr.fcr }}</td>
 							<td md-cell>{{ fcrVm.totalAgentsFcr.total }}</td>
-						</tr> -->
+						</tr>
 
 						<tr md-row ng-repeat="agent in fcrVm.agentsFcr | orderBy: fcrVm.tableSort">
 							<td md-cell>{{agent.agent}}</td>

@@ -100,12 +100,12 @@
 						title="FCR"
 						subhead="First Call Resolution, %" 
 						card-class="no-margin no-shadow"
-						model="{{dashVm.globalFcr.fcrRate | number: 1}}" 
-						prevstat="{{dashVm.prevGlobalFcr.fcrRate | diff:dashVm.globalFcr.fcrRate }}"
-						dynamics="{{dashVm.prevGlobalFcr.fcrRate | diff:dashVm.globalFcr.fcrRate:'dynamics'}}">
+						model="{{dashVm.globalFcr[kind.name].fcrRate | number: 1}}" 
+						prevstat="{{dashVm.prevGlobalFcr[kind.name].fcrRate | diff:dashVm.globalFcr[kind.name].fcrRate }}"
+						dynamics="{{dashVm.prevGlobalFcr[kind.name].fcrRate | diff:dashVm.globalFcr[kind.name].fcrRate:'dynamics'}}">
 					</stat-card>
 					<canvas flex id="nc-chart" class="chart chart-doughnut" ng-style="dashVm.chartOptions.layout" 
-					  chart-options="dashVm.chartOptions" chart-data="[dashVm.globalFcr.fcr, (dashVm.globalFcr.total - dashVm.globalFcr.fcr)]" chart-labels="['Resolved Calls', 'Unresolved Calls']" chart-legend="true" chart-colours="['#3F51B5', '#9E9E9E']">
+					  chart-options="dashVm.chartOptions" chart-data="[dashVm.globalFcr[kind.name].fcr, (dashVm.globalFcr[kind.name].total - dashVm.globalFcr[kind.name].fcr)]" chart-labels="['Resolved Calls', 'Unresolved Calls']" chart-legend="true" chart-colours="['#3F51B5', '#9E9E9E']">
 					</canvas> 
 					<ul class="chart-labels inline">
 						<li ng-repeat="label in ['Resolved Calls', 'Unresolved Calls'] track by $index">
