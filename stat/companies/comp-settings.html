@@ -1,0 +1,27 @@
+<md-dialog flex="auto" aria-label="Report settings">
+    <md-toolbar>
+        <div class="md-toolbar-tools">
+            <h2>Report settings</h2>
+            <span flex></span>
+            <md-button class="md-icon-button" ng-click="compSettsVm.close()">
+                <i class="material-icons">close</i>
+            </md-button>
+        </div>
+    </md-toolbar>
+    <md-dialog-content>
+        <div layout="column" layout-gt-xs="row" layout-padding>
+            <div flex>
+                <md-subheader>Service Level</md-subheader>
+                <md-select ng-model="compSettsVm.sl" aria-label="Service Level">
+                    <md-option ng-value="item" ng-repeat="item in compSettsVm.sls">
+                        {{item}}
+                    </md-option>
+                </md-select>
+            </div>
+        </div>
+    </md-dialog-content>
+    <md-dialog-actions>
+        <md-button class="md-primary" aria-label="Save" ng-click="compSettsVm.save()">Submit</md-button>
+        <md-button ng-click="compSettsVm.close()">Close</md-button>
+    </md-dialog-actions>
+</md-dialog>

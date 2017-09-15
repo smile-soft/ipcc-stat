@@ -1,0 +1,80 @@
+<section layout="column" layout-gt-xs="row" layout-padding layout-align="start center">
+	<div layout layout-align="center" layout-align-gt-xs="start center" layout-wrap>
+		<md-datepicker ng-model="compVm.begin" md-max-date="compVm.end"></md-datepicker>
+		<md-datepicker ng-model="compVm.end" md-min-date="compVm.begin"></md-datepicker>
+		<md-button hide-xs class="md-primary" ng-click="compVm.getCompaniesStat()" aria-label="Update Statistics">Update</md-button>		
+	</div>
+	<span flex></span>
+	<div layout layout-align="end center" flex>
+		<md-button class="md-icon-button md-primary" ng-click="compVm.openSettings($event)" aria-label="Open Report Settings"><md-icon>settings</md-icon></md-button>
+	</div>
+</section>
+<md-divider layout flex></md-divider>
+<section layout>
+	<md-card flex>
+		<md-toolbar>
+			<div class="md-toolbar-tools">
+				<h2>Company Statistics</h2>
+				<span flex></span>
+				<md-button href="#" download="companies.xls" onclick="ExcellentExport.excel(this, 'performance-table', 'Category Sheet');">.xlsx</md-button>
+				<md-button href="#" download="companies.csv" onclick="ExcellentExport.csv(this, 'performance-table');">.csv</md-button>
+			</div>
+		</md-toolbar>
+		<spinner name="companies-loader" show="true"><md-progress-linear md-mode="indeterminate"></md-progress-linear></spinner>
+		<md-card-content layout="row" layout-wrap>
+			<md-table-container flex="80" flex-xs="100" flex-order="1">
+				<table md-table id="performance-table">
+					<thead md-head md-order="compVm.tableSort">
+						<tr md-row>
+							<th md-column md-order-by="compdesc">Company</th>
+							<th md-column md-numeric md-order-by="'sl'+{{compVm.sl}}">SL, %</th>
+							<th md-column md-numeric md-order-by="nco">NCO</th>
+							<th md-column md-numeric md-order-by="nco_p">NCO, %</th>
+							<th md-column md-numeric md-order-by="nca">NCA</th>
+							<th md-column md-numeric md-order-by="nca_p">NCA, %</th>
+							<th md-column md-numeric md-order-by="aht">AHT</th>
+							<th md-column md-numeric md-order-by="aht_p">AHT, %</th>
+							<th md-column md-numeric md-order-by="att">ATT</th>
+							<th md-column md-numeric md-order-by="att_p">ATT, %</th>
+						</tr>
+					</thead>
+					<tbody md-body>
+						<tr md-row ng-show="!compVm.stat.length">
+							<td colspan="7">No data for period</td>
+						</tr>
+
+						<tr md-row ng-repeat="stat in compVm.stat | orderBy: compVm.tableSort">
+							<td md-cell>{{stat.compdesc}}</td>
+							<td md-cell>{{stat['sl'+compVm.sl] | number: 0}}</td>
+							<td md-cell>{{stat.nco | number: 0}}</td>
+							<td md-cell>{{stat.nco_p | number: 1}}</td>
+							<td md-cell>{{stat.nca | number: 0}}</td>
+							<td md-cell>{{stat.nca_p | number: 1}}</td>
+							<td md-cell>{{stat.aht | timer}}</td>
+							<td md-cell>{{stat.aht_p | number: 1}}</td>
+							<td md-cell>{{stat.att | timer}}</td>
+							<td md-cell>{{stat.att_p | number: 1}}</td>
+						</tr>
+					</tbody>
+				</table>
+			</md-table-container>
+			<div layout layout-wrap layout-fill layout-margin layout-align="center start" flex="100" flex-gt-xs="20" flex-order="2" flex-order-xs="-1">
+				<md-input-container flex="100">
+					<label>Metric</label>
+					<md-select ng-model="compVm.chartLabel" placeholder="Metric">
+				    	<md-option ng-value="item.index" ng-repeat="item in compVm.chartMetrics">{{item.name}}</md-option>
+					</md-select>
+				</md-input-container>
+				<canvas flex="100" id="comp-chart" class="chart chart-pie" ng-style="compVm.chartOptions.layout" 
+				  chart-options="compVm.chartOptions" chart-data="compVm.chartData.data" chart-labels="compVm.chartData.labels" chart-legend="true" chart-colors="compVm.chartData.colours">
+				</canvas>
+				<ul class="chart-labels">
+					<li ng-repeat="label in compVm.chartData.labels track by $index">
+						<span class="chart-label-color" style="background-color: {{compVm.chartData.colours[$index]}}"></span>
+						<span> {{label}}</span>
+					</li>
+				</ul>
+			</div>
+		</md-card-content>
+	</md-card>
+</section>
