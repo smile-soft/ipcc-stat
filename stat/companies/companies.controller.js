@@ -6,9 +6,9 @@
 		.module('app.companies')
 		.controller('CompaniesController', CompaniesController);
 
-	CompaniesController.$inject = ['$scope', '$mdDialog', 'apiService', 'spinnerService', 'SettingsService', 'chartService', 'utilsService', 'debugService', 'errorService'];
+	CompaniesController.$inject = ['$scope', '$mdDialog', '$mdMedia', 'apiService', 'spinnerService', 'SettingsService', 'chartService', 'utilsService', 'debugService', 'errorService'];
 
-	function CompaniesController($scope, $mdDialog, api, spinnerService, SettingsService, chartService, utils, debug, errorService) {
+	function CompaniesController($scope, $mdDialog, $mdMedia, api, spinnerService, SettingsService, chartService, utils, debug, errorService) {
 
 		var vm = this;
 		var defaults = {
@@ -40,12 +40,9 @@
 		vm.tableSort = '-nco';
 		vm.getCompaniesStat = getCompaniesStat;
 		vm.openSettings = openSettings;
-
-		$scope.$watch(function() {
-			return vm.chartLabel;
-		}, function(newValue, prevValue) {
-			vm.chartData = chartService.setChartData(vm.stat, vm.chartLabel, vm.settings.tables.companies.columns.description, vm.chartLabel);
-		});
+		vm.onCompSelect = onCompSelect;
+		vm.userFullScreen = $mdMedia('xs');
+		
 
 		init();
 		spinnerService.hide('main-loader');
@@ -54,7 +51,14 @@
 			SettingsService.getSettings()
 			.then(function(dbSettings){
 				vm.settings = dbSettings;
-				getCompaniesStat();
+				return getCompaniesStat();
+			})
+			.then(function() {
+				$scope.$watch(function() {
+					return vm.chartLabel;
+				}, function(newValue, prevValue) {
+					vm.chartData = chartService.setChartData(vm.stat, vm.chartLabel, vm.settings.tables.companies.columns.description, vm.chartLabel);
+				});
 			})
 			.catch(errorService.show);
 		}
@@ -82,7 +86,7 @@
 
 			spinnerService.show('companies-loader');
 
-			api.getCustomListStatistics({
+			return api.getCustomListStatistics({
 				tables: tablesList,
 				tabrel: [tables.calls.name, tables.calls.columns.company].join('.')+'='+[tables.companies.name, tables.companies.columns.id].join('.'),
 				procid: [tables.calls.name, tables.calls.columns.process_id].join('.'),
@@ -104,6 +108,62 @@
 			})
 			.catch(errorService.show);
 
+		}
+
+		function onCompSelect(item) {
+			debug.log('onCompSelect: ', item);
+
+			spinnerService.show('companies-loader');
+			
+			var tables = vm.settings.tables;
+			var columnsAlias = {
+				agent: [tables.calls.name, tables.calls.columns.operator].join('.'),
+				phone: [tables.calls.name, tables.calls.columns.customer_phone].join('.'),
+				date: [tables.calls.name, tables.calls.columns.calldate].join('.'),
+				comment: [tables.calls.name, tables.calls.columns.comments].join('.')
+			},
+			columns, columnsKeys;
+
+			var tablesList = [tables.processed.name, tables.calls.name];
+			if(tables.companies) tablesList.push(tables.companies.name);
+
+			if(tables.calls.columns.company) columnsAlias.description = [tables.companies.name, tables.companies.columns.description].join('.');
+			if(tables.calls.columns.customer_name) columnsAlias.cname = [tables.calls.name, tables.calls.columns.customer_name].join('.');
+			if(tables.calls.columns.callresult) columnsAlias.callresult = [tables.calls.name, tables.calls.columns.callresult].join('.');
+
+			columns = Object.keys(columnsAlias).map(function(key) { return columnsAlias[key]; });
+			columnsKeys = Object.keys(columnsAlias).map(function(key) { return key; });
+
+			return api.getQueryResultSet({
+				tables: tablesList,
+				tabrel: [tables.calls.name, tables.calls.columns.company].join('.')+'='+item[tables.calls.columns.company]+
+						' and '+[tables.calls.name, tables.calls.columns.operator].join('.')+'=processed.agentid '+				
+						' and '+[tables.calls.name, tables.calls.columns.company].join('.')+'='+[tables.companies.name, tables.companies.columns.id].join('.')+
+						' and '+[tables.calls.name, tables.calls.columns.process_id].join('.')+'=processed.procid',
+				columns: Object.keys(columns).map(function(key) { return columns[key]; }),
+				begin: vm.begin.valueOf(),
+				end: vm.end.valueOf()
+			}).then(function(response){
+				spinnerService.hide('companies-loader');
+				
+				var processes = utils.queryToObject(response.data.result, columnsKeys);
+
+				$mdDialog.show({
+					templateUrl: 'dashboard/export-processes.html',
+					locals: {
+						tables: vm.settings.tables,
+						begin: vm.begin,
+						end: vm.end,
+						data: processes
+					},
+					controller: 'ProcessesExportController',
+					controllerAs: 'procExpVm',
+					parent: angular.element(document.body),
+					fullscreen: vm.userFullScreen
+				});
+
+				debug.log('onCompSelect result: ', response);
+			});
 		}
 
 		function addPercentageValues(data, totals){

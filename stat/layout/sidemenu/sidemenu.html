@@ -27,6 +27,20 @@
 					<span>FCR</span>
 				</a>
 			</md-list-item>
+			
+			<md-list-item class="md-list-item-text" ng-if="sidemenuVm.tables.companies">
+				<a href="#/companies" layout="row" layout-align="start center" flex="grow">
+					<i class="material-icons">business</i>
+					<span>Company statistics</span>
+				</a>
+			</md-list-item>
+
+			<md-list-item class="md-list-item-text" ng-if="sidemenuVm.tables.qoscheck">
+				<a href="#/qos" layout="row" layout-align="start center" flex="grow">
+					<i class="material-icons">assessment</i>
+					<span>Quality of service</span>
+				</a>
+			</md-list-item>
 		</md-list>
 	</md-content>
 </md-sidenav>

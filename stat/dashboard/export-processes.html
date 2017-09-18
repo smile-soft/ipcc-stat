@@ -29,25 +29,25 @@
             <table md-table id="proc-table">
                 <thead md-order="procExpVm.order" md-head>
                     <tr md-row>
-                        <th md-order-by="{{procExpVm.tables.calls.columns.calldate}}" md-column>Date</th>
-                        <th md-order-by="{{procExpVm.tables.calls.columns.operator}}" md-column>Operator</th>
-                        <th ng-if="procExpVm.tables.calls.columns.customer_name" md-order-by="{{procExpVm.tables.calls.columns.customer_name}}" md-column>Name</th>
-                        <th md-order-by="{{procExpVm.tables.calls.columns.customer_phone}}" md-column>Phone</th>
-                        <th ng-if="procExpVm.tables.calls.columns.company" md-order-by="{{procExpVm.tables.companies.columns.description}}" md-column>Company</th>
-                        <th md-order-by="{{procExpVm.tables.calls.columns.comments}}" md-column>Comment</th>
-                        <th ng-if="procExpVm.tables.calls.columns.callresult" md-order-by="{{procExpVm.tables.calls.columns.callresult}}" md-column>Call Resolution</th>
+                        <th md-order-by="date" md-column>Date</th>
+                        <th md-order-by="agent" md-column>Operator</th>
+                        <th ng-if="procExpVm.tables.calls.columns.customer_name" md-order-by="cname" md-column>Name</th>
+                        <th md-order-by="phone" md-column>Phone</th>
+                        <th ng-if="procExpVm.tables.calls.columns.company" md-order-by="description" md-column>Company</th>
+                        <th md-order-by="comment" md-column>Comment</th>
+                        <th ng-if="procExpVm.tables.calls.columns.callresult" md-order-by="callresult" md-column>Call Resolution</th>
                     </tr>
                 </thead>
                 <tbody md-body>
                     <tr md-row ng-repeat="item in procExpVm.data | filter:procExpVm.search | filter:procExpVm.filterByResult | orderBy: procExpVm.order">
-                        <td md-cell>{{::item[procExpVm.tables.calls.columns.calldate]}}</td>
-                        <td md-cell>{{::item[procExpVm.tables.calls.columns.operator]}}</td>
-                        <td ng-if="procExpVm.tables.calls.columns.customer_name" md-cell>{{::item[procExpVm.tables.calls.columns.customer_name]}}</td>
-                        <td md-cell>{{::item[procExpVm.tables.calls.columns.customer_phone]}}</td>
-                        <td ng-if="procExpVm.tables.calls.columns.company" md-cell>{{::item[procExpVm.tables.companies.columns.description]}}</td>
-                        <td md-cell>{{::item[procExpVm.tables.calls.columns.comments]}}</td>
-                        <td ng-if="item[procExpVm.tables.calls.columns.callresult] == 1" md-cell>+</td>
-                        <td ng-if="item[procExpVm.tables.calls.columns.callresult] == 0" md-cell>-</td>
+                        <td md-cell>{{::item.date}}</td>
+                        <td md-cell>{{::item.agent}}</td>
+                        <td ng-if="procExpVm.tables.calls.columns.customer_name" md-cell>{{::item.cname}}</td>
+                        <td md-cell>{{::item.phone}}</td>
+                        <td ng-if="procExpVm.tables.calls.columns.company" md-cell>{{::item.description}}</td>
+                        <td md-cell>{{::item.comment}}</td>
+                        <td ng-if="item.callresult == 1" md-cell>+</td>
+                        <td ng-if="item.callresult == 0" md-cell>-</td>
                     </tr>
                 </tbody>
             </table>

@@ -19,7 +19,7 @@
 
 		debug.log('ProcessesExportController: ', vm.data);
 
-		vm.order = tables.calls.columns.calldate,
+		vm.order = 'date';
 		vm.search = '';
 		vm.filter = {
 			callresult: ''

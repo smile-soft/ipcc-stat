@@ -43,7 +43,7 @@
 							<td colspan="7">No data for period</td>
 						</tr>
 
-						<tr md-row ng-repeat="stat in compVm.stat | orderBy: compVm.tableSort">
+						<tr md-row ng-repeat="stat in compVm.stat | orderBy: compVm.tableSort" ng-click="compVm.onCompSelect(stat)">
 							<td md-cell>{{stat.compdesc}}</td>
 							<td md-cell>{{stat['sl'+compVm.sl] | number: 0}}</td>
 							<td md-cell>{{stat.nco | number: 0}}</td>

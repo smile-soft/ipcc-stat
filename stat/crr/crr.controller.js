@@ -107,7 +107,7 @@
 
 			return api.getCustomListStatistics({
 				tables: [tables.calls.name],
-				tabrel: 'taskid in (\''+vm.tasks.join('\',\'')+'\')'+
+				tabrel: 'taskid in (\''+vm.selectedTasks.join('\',\'')+'\')'+
 						' and '+[tables.calls.name, tables.calls.columns.operator].join('.')+'=processed.agentid',
 				procid: [tables.calls.name, tables.calls.columns.process_id].join('.'),
 				columns: [tables.calls.columns.operator],
@@ -123,7 +123,7 @@
 
 			return api.getCustomListStatistics({
 				tables: [tables.calls.name],
-				tabrel: 'taskid in (\''+vm.tasks.join('\',\'')+'\')'+
+				tabrel: 'taskid in (\''+vm.selectedTasks.join('\',\'')+'\')'+
 						' and '+[tables.calls.name, tables.calls.columns.operator].join('.')+'=processed.agentid'+
 						' and '+[tables.calls.name, tables.calls.columns.callresult].join('.')+'=1',
 				procid: [tables.calls.name, tables.calls.columns.process_id].join('.'),

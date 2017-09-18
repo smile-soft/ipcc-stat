@@ -1,0 +1,32 @@
+<md-dialog flex="auto" aria-label="QOS settings">
+    <md-toolbar>
+        <div class="md-toolbar-tools">
+            <h2>QOS settings</h2>
+            <span flex></span>
+            <md-button class="md-icon-button" ng-click="qosSettsVm.close()">
+                <i class="material-icons">close</i>
+            </md-button>
+        </div>
+    </md-toolbar>
+    <md-dialog-content>
+        <div layout="column" layout-gt-xs="row" layout-padding>
+            <div flex>
+                <md-subheader>Tasks</md-subheader>
+                <md-list>
+                    <md-checkbox ng-model="qosSettsVm.allTasksSelected" ng-change="qosSettsVm.selectAllTasks()" aria-label="Select All Tasks">
+                            Select All
+                    </md-checkbox>
+                    <md-list-item ng-repeat="item in qosSettsVm.tasks">
+                        <md-checkbox ng-checked="qosSettsVm.exists(item, qosSettsVm.selectedTasks)" ng-click="qosSettsVm.toggle(item, qosSettsVm.selectedTasks)" aria-label="Selected tasks">
+                        </md-checkbox>
+                        {{item}}
+                    </md-list-item>
+                </md-list>
+            </div>
+        </div>
+    </md-dialog-content>
+    <md-dialog-actions>
+        <md-button class="md-primary" aria-label="Save" ng-click="qosSettsVm.save()">Submit</md-button>
+        <md-button ng-click="qosSettsVm.close()">Close</md-button>
+    </md-dialog-actions>
+</md-dialog>

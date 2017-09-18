@@ -132,10 +132,14 @@
 
 		function getCategories(){
 			var tables = vm.settings.tables;
+			var columns = [
+				[tables.categories.name, tables.categories.columns.description].join('.'),
+				[tables.categories.name, tables.categories.columns.id].join('.')
+			];
 			
 			return api.getQueryResultSet({
 				tables: [tables.categories.name],
-				columns: [tables.categories.columns.description, tables.categories.columns.id],
+				columns: columns,
 				groupBy: [tables.categories.columns.description, tables.categories.columns.id].join(',')
 			}).then(function(cats){
 				vm.cats = cats.data.result.length ? (cats.data.result.map(function(cat) { return { desc: cat[0], id: cat[1] } })) : [];
@@ -148,10 +152,16 @@
 
 		function getSubcategories(){
 			var tables = vm.settings.tables;
+			var columns = [
+				[tables.categories.name, tables.categories.columns.description].join('.'),
+				[tables.categories.name, tables.categories.columns.id].join('.'),
+				[tables.subcategories.name, tables.subcategories.columns.description].join('.'),
+				[tables.subcategories.name, tables.subcategories.columns.id].join('.')
+			];
 			
 			return api.getQueryResultSet({
 				tables: [tables.categories.name, tables.subcategories.name],
-				columns: [tables.categories.columns.description, tables.categories.name+'.'+tables.categories.columns.id, tables.subcategories.columns.description, tables.subcategories.columns.id],
+				columns: columns,
 				tabrel: tables.subcategories.name+'.'+tables.subcategories.columns.category_id+'='+tables.categories.name+'.'+tables.categories.columns.id,
 				groupBy: [tables.categories.columns.description, tables.categories.name+'.'+tables.categories.columns.id, tables.subcategories.columns.description, tables.subcategories.columns.id].join(',')
 				// groupBy: [tables.categories.columns.description, tables.subcategories.columns.description]

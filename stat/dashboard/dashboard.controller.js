@@ -273,19 +273,25 @@
 		function onSubCatSelect(cat, subcat, index) {
 			var tables = vm.options.db.tables,
 				tcols = tables.calls.columns,
-				columns = [tcols.operator, tcols.customer_phone, tcols.calldate, tcols.comments],
-				data;
+				columnsAlias = {
+					agent: [tables.calls.name, tcols.operator].join('.'), 
+					phone: [tables.calls.name, tcols.customer_phone].join('.'), 
+					date: [tables.calls.name, tcols.calldate].join('.'), 
+					comment: [tables.calls.name, tcols.comments].join('.')
+				},
+				columns, columnsKeys, data;
 
-			debug.log('onSubCatSelect: ', cat, subcat, index);
+			if(tables.calls.columns.company) columnsAlias.description = [tables.companies.name, tables.companies.columns.description].join('.');
+			if(tables.calls.columns.customer_name) columnsAlias.cname = [tables.calls.name, tables.calls.columns.customer_name].join('.');
+			if(tables.calls.columns.callresult) columnsAlias.callresult = [tables.calls.name, tables.calls.columns.callresult].join('.');
 
-			if(tables.calls.columns.company) columns.push(tables.companies.columns.description);
-			if(tables.calls.columns.customer_name) columns.push(tables.calls.columns.customer_name);
-			if(tables.calls.columns.callresult) columns.push(tables.calls.columns.callresult);
+			columns = Object.keys(columnsAlias).map(function(key) { return columnsAlias[key]; });
+			columnsKeys = Object.keys(columnsAlias).map(function(key) { return key; });
 
 			getCatProcesses(columns, cat, subcat).then(function(result) {
 				data = result.data;
 				if(data.error) return errorService.show(data.error.message);
-				vm.processes = utils.queryToObject(data.result, columns);
+				vm.processes = utils.queryToObject(data.result, columnsKeys);
 				$mdDialog.show({
 					templateUrl: 'dashboard/export-processes.html',
 					locals: {

@@ -1,0 +1,109 @@
+<section layout="column" layout-gt-xs="row" layout-padding layout-align="start center">
+	<div layout layout-align="center" layout-align-gt-xs="start center" layout-wrap>
+		<md-datepicker ng-model="qosVm.begin" md-max-date="qosVm.end"></md-datepicker>
+		<md-datepicker ng-model="qosVm.end" md-min-date="qosVm.begin"></md-datepicker>
+		<md-button hide-xs class="md-primary" ng-click="qosVm.getStat()" aria-label="Update Statistics">Update</md-button>
+	</div>
+	<span flex></span>
+	<div layout layout-align="end center" flex>
+		<md-button class="md-icon-button md-primary" ng-click="qosVm.openSettings($event)" aria-label="Open Settings"><md-icon>settings</md-icon></md-button>
+	</div>
+</section>
+<md-divider layout flex></md-divider>
+<section layout>
+	<md-card flex>
+		<md-tabs md-dynamic-height md-border-bottom>
+			<md-tab label="all">
+				<md-content>
+					<md-toolbar>
+						<div class="md-toolbar-tools">
+							<!-- <h2>QOS Result</h2> -->
+							<span flex></span>
+							<md-button href="#" download="qos.xls" onclick="ExcellentExport.excel(this, 'qos-table', 'Category Sheet');">.xlsx</md-button>
+							<md-button href="#" download="qos.csv" onclick="ExcellentExport.csv(this, 'qos-table');">.csv</md-button>
+						</div>
+					</md-toolbar>
+					<spinner name="qos-loader" show="true"><md-progress-linear md-mode="indeterminate"></md-progress-linear></spinner>
+					<md-card-content layout="row" layout-wrap>
+						<md-table-container flex>
+							<table md-table id="qos-table">
+								<thead md-head md-order="qosVm.tableSort">
+									<tr md-row>
+										<th md-column md-order-by="date">Date</th>
+										<th md-column md-order-by="task">Task</th>
+										<th md-column md-order-by="agent">Agent</th>
+										<th md-column md-order-by="phone">Number</th>
+										<th md-column md-order-by="category">Subject</th>
+										<th md-column md-order-by="subcategory">Provider</th>
+										<th md-column md-order-by="company">Service</th>
+										<th ng-repeat="q in qosVm.qnum track by $index" md-column>Q{{$index+1}}</th>
+										<th md-column md-order-by="comment">Comment</th>
+									</tr>
+								</thead>
+								<tbody md-body>
+									<tr md-row ng-show="!qosVm.stat.length">
+										<td colspan="8">No data for period</td>
+									</tr>
+
+									<tr md-row ng-repeat="stat in qosVm.stat | orderBy: qosVm.tableSort">
+										<td md-cell>{{ stat.date | tsToDate }}</td>
+										<td md-cell>{{ stat.task }}</td>
+										<td md-cell>{{ stat.agent }}</td>
+										<td md-cell>{{ stat.phone }}</td>
+										<td md-cell>{{ stat.category }}</td>
+										<td md-cell>{{ stat.subcategory }}</td>
+										<td md-cell>{{ stat.company }}</td>
+										<td ng-repeat="q in qosVm.qnum track by $index" md-cell>{{ stat.questions[$index+1] }}</td>
+										<td md-cell>{{ stat.comment }}</td>
+									</tr>
+								</tbody>
+							</table>
+						</md-table-container>
+					</md-card-content>
+				</md-content>
+			</md-tab>
+			<md-tab label="by agent">
+				<md-content>
+					<md-toolbar>
+						<div class="md-toolbar-tools">
+							<!-- <h2>QOS Result</h2> -->
+							<span flex></span>
+							<md-button href="#" download="qos-avg.xls" onclick="ExcellentExport.excel(this, 'qos-avg-table', 'Category Sheet');">.xlsx</md-button>
+							<md-button href="#" download="qos-avg.csv" onclick="ExcellentExport.csv(this, 'qos-avg-table');">.csv</md-button>
+						</div>
+					</md-toolbar>
+					<spinner name="qos-avg-loader" show="true"><md-progress-linear md-mode="indeterminate"></md-progress-linear></spinner>
+					<md-card-content layout="row" layout-wrap>
+						<md-table-container flex>
+							<table md-table id="qos-avg-table">
+								<thead md-head md-order="qosVm.tableAvgSort">
+									<tr md-row>
+										<th md-column md-order-by="agent">Agent</th>
+										<th ng-repeat="q in qosVm.qnum track by $index" md-column>Q{{$index+1}}</th>
+									</tr>
+								</thead>
+								<tbody md-body>
+									<tr md-row ng-show="!qosVm.stat.length">
+										<td colspan="{{ qosVm.qnum.length + 1 }}">No data for period</td>
+									</tr>
+
+									<tr md-row ng-repeat="stat in qosVm.statAvg | orderBy: qosVm.tableAvgSort">
+										<td md-cell>{{ stat.agent }}</td>
+										<td ng-repeat="q in qosVm.qnum track by $index" md-cell>{{ (stat.questions[$index+1] / stat.count).toFixed(2) }}</td>
+									</tr>
+									<tr md-row ng-show="qosVm.stat.length">
+										<td md-cell><b>Total</b></td>
+										<td ng-repeat="q in qosVm.qnum track by $index" md-cell>{{ (qosVm.totalAvg[$index+1] / qosVm.stat.length).toFixed(2) }}</td>
+									</tr>
+								</tbody>
+							</table>
+						</md-table-container>
+					</md-card-content>
+				</md-content>
+			</md-tab>
+		</md-tabs>
+
+
+				
+	</md-card>
+</section>
