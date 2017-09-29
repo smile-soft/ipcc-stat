@@ -6,9 +6,9 @@
 		.module('app.crr')
 		.controller('CrrController', CrrController);
 
-	CrrController.$inject = ['$rootScope', '$mdDialog', 'SettingsService', 'apiService', 'store', 'TasksService', 'utilsService', 'debugService', 'spinnerService', 'errorService'];
+	CrrController.$inject = ['$rootScope', '$mdDialog', '$q', 'SettingsService', 'apiService', 'store', 'TasksService', 'utilsService', 'debugService', 'spinnerService', 'errorService'];
 
-	function CrrController($rootScope, $mdDialog, SettingsService, api, store, TasksService, utils, debug, spinnerService, errorService) {
+	function CrrController($rootScope, $mdDialog, $q, SettingsService, api, store, TasksService, utils, debug, spinnerService, errorService) {
 
 		var vm = this;
 		var defaultOptions = {
@@ -27,7 +27,7 @@
 		vm.getCallResolution = getCallResolution;
 		vm.openSettings = openSettings;
 		vm.tableSort = '-perf';
-		vm.data = store.get('data');
+		// vm.data = store.get('data');
 
 		init();
 		spinnerService.hide('main-loader');
@@ -36,13 +36,21 @@
 			SettingsService.getSettings()
 			.then(function(dbSettings){
 				vm.settings = dbSettings;
-				return getTaskList(vm.data);
+				return $q.resolve(vm.settings);
+				// return getTaskList(vm.data);
 				// return TasksService.getTaskList(1);
+			})
+			.then(function(settings) {
+				return TasksService.getTasks(settings.kinds);
 			})
 			.then(function(tasks) {
 				debug.log('tasks: ', tasks);
-				vm.tasks = tasks;
-				vm.selectedTasks = tasks;
+				vm.tasks = Object.keys(tasks)
+							.map(function(key) { return tasks[key]; })
+							.reduce(function(prev, next) { return prev.concat(next); }, []);
+
+				vm.selectedTasks = vm.tasks;
+				return $q.resolve();
 			})
 			.then(getCallResolution)
 			.catch(errorService.show);

@@ -53,7 +53,7 @@
 										<td md-cell>{{ stat.category }}</td>
 										<td md-cell>{{ stat.subcategory }}</td>
 										<td md-cell>{{ stat.company }}</td>
-										<td ng-repeat="q in qosVm.qnum track by $index" md-cell>{{ stat.questions[$index+1] }}</td>
+										<td ng-repeat="q in qosVm.qnum track by $index" md-cell>{{ stat.questions[$index+1] || '-' }}</td>
 										<td md-cell>{{ stat.comment }}</td>
 									</tr>
 								</tbody>

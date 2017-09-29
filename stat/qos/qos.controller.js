@@ -6,9 +6,9 @@
 		.module('app.qos')
 		.controller('QosController', QosController);
 
-	QosController.$inject = ['$rootScope', '$mdDialog', 'SettingsService', 'apiService', 'store', 'TasksService', 'utilsService', 'debugService', 'spinnerService', 'errorService'];
+	QosController.$inject = ['$rootScope', '$mdDialog', '$q', 'SettingsService', 'apiService', 'store', 'TasksService', 'utilsService', 'debugService', 'spinnerService', 'errorService'];
 
-	function QosController($rootScope, $mdDialog, SettingsService, api, store, TasksService, utils, debug, spinnerService, errorService) {
+	function QosController($rootScope, $mdDialog, $q, SettingsService, api, store, TasksService, utils, debug, spinnerService, errorService) {
 
 		var vm = this;
 		var defaultOptions = {
@@ -42,14 +42,25 @@
 			SettingsService.getSettings()
 			.then(function(dbSettings){
 				vm.settings = dbSettings;
-				vm.columns = getColumns();
+				vm.columns = getColumns(dbSettings.tables);
 				
-				return getTaskList(vm.data);
+				debug.log('qos init: ', dbSettings);
+				
+				return $q.resolve(vm.settings);
+					
+			})
+			.then(function(settings) {
+				return TasksService.getTasks(settings.kinds);
 			})
 			.then(function(tasks) {
 				debug.log('tasks: ', tasks);
-				vm.tasks = tasks;
-				vm.selectedTasks = tasks;
+				vm.tasks = Object.keys(tasks)
+							.map(function(key) { return tasks[key]; })
+							.reduce(function(prev, next) { return prev.concat(next); }, []);
+
+				vm.selectedTasks = vm.tasks;
+				
+				return $q.resolve();
 			})
 			.then(getStat)
 			.catch(errorService.show);
@@ -72,8 +83,12 @@
 			});
 		}
 
-		function getColumns() {
-			var tables = vm.settings.tables;
+		function getColumns(tables) {
+
+			// var tables = vm.settings.tables;
+			
+			debug.log('qos getColumns: ', tables);
+
 			return {
 				procid: [tables.qoscheck.name, tables.qoscheck.columns.procid].join('.'),
 				date: [tables.qoscheck.name, tables.qoscheck.columns.callstamp].join('.'),
@@ -102,6 +117,8 @@
 				tables: [tables.calls.name, tables.categories.name, tables.subcategories.name, tables.companies.name, tables.qoscheck.name, tables.qoscheck_answers.name],
 				tabrel: 
 						'taskid in (\''+vm.selectedTasks.join('\',\'')+'\')'+
+						' and '+[tables.processed.name, 'procid'].join('.')+'='+[tables.qoscheck.name, tables.qoscheck.columns.procid].join('.')+
+						' and '+[tables.calls.name, tables.calls.columns.process_id].join('.')+'='+[tables.qoscheck.name, tables.qoscheck.columns.procid].join('.')+
 						' and '+[tables.calls.name, tables.calls.columns.category].join('.')+'='+[tables.categories.name, tables.categories.columns.id].join('.')+
 						' and '+[tables.calls.name, tables.calls.columns.subcategory].join('.')+'='+[tables.subcategories.name, tables.subcategories.columns.id].join('.')+
 						' and '+[tables.calls.name, tables.calls.columns.company].join('.')+'='+[tables.companies.name, tables.companies.columns.id].join('.')+
@@ -160,7 +177,6 @@
 			spinnerService.hide('qos-loader');
 			spinnerService.hide('qos-avg-loader');
 
-			debug.log('showStat stat: ', stat);
 		}
 
 		function getAvgStat() {
@@ -189,15 +205,17 @@
 			vm.statAvg = statAvg;
 			vm.totalAvg = totalAvg;
 
-			debug.log('getAvgStat: ', statAvg, totalAvg);
-
 		}
 
 		function getTaskList(data) {
 			var tasks = [];
-			Object.keys(data).forEach(function(item) {
-				tasks = tasks.concat(data[item].tasks);
-			});
+
+			if(data) {
+				Object.keys(data).forEach(function(item) {
+					tasks = tasks.concat(data[item].tasks);
+				});
+			}
+				
 			return tasks;
 		}
 

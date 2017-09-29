@@ -14,7 +14,6 @@ angular.module('app')
 	return function(ts) {
 		if(!ts) return;
 		var date = new Date(ts*1000).toLocaleString();
-		console.log('tsToDate: ', date);
 		return date;
 	};
 })

@@ -45,7 +45,7 @@
 		vm.onCatSelect = onCatSelect;
 		vm.onSubcatSelect = onSubcatSelect;
 		vm.countFcr = countFcr;
-		vm.data = store.get('data');
+		// vm.data = store.get('data');
 
 		init();
 		spinnerService.show('main-loader');
@@ -57,13 +57,21 @@
 				if(!vm.settings.tables.subcategories.columns.category_id) 
 					withSubcats = false;
 
+				return $q.resolve(vm.settings);
+
 				// return TasksService.getTaskList(1);
-				return getTaskList(vm.data);
+				// return getTaskList(vm.data);
+			})
+			.then(function(settings) {
+				return TasksService.getTasks(settings.kinds);
 			})
 			.then(function(tasks) {
 				debug.log('tasks: ', tasks);
-				vm.tasks = tasks;
-				vm.selectedTasks = store.get('selectedTasks') || tasks;
+				vm.tasks = Object.keys(tasks)
+							.map(function(key) { return tasks[key]; })
+							.reduce(function(prev, next) { return prev.concat(next); }, []);
+							
+				vm.selectedTasks = store.get('selectedTasks') || vm.tasks;
 				vm.selectedCats = store.get('selectedCats') || [];
 				vm.selectedSubcats = store.get('selectedSubcats') || [];
 

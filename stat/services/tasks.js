@@ -6,23 +6,31 @@
         .module('app')
         .factory('TasksService', TasksService);
 
-    TasksService.$inject = ['apiService', 'errorService'];
+    TasksService.$inject = ['$q', 'apiService', 'errorService'];
 
-    function TasksService(api, errorService){
+    function TasksService($q, api, errorService){
 
-        var tasks = [
-            {name: 'Incoming_Agent', kind: 1},
-            {name: 'Messaging_Chat', kind: 7},
-            {name: 'Autodial_Agent', kind: 129}
-        ];
+        var tasks = {};
 
         return {
             getTasks: getTasks,
             getTaskList: getTaskList
         };
         
-        function getTasks() {
-            return tasks;
+        function getTasks(kinds) {
+            return $q(function(resolve, reject) {
+
+                if(Object.keys(tasks).length) return resolve(tasks);
+
+                kinds.forEach(function(item, index, array) {
+                    api.getTasks({ kind: item.kind })
+                    .then(function(response) {
+                        tasks[item.name] = response.data.result;
+                        if(index === array.length-1) resolve(tasks);
+                    })
+                    .catch(function(err) { reject(err); });
+                });
+            });
         }
 
         function getTaskList(id) {

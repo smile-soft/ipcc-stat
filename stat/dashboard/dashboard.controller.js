@@ -47,25 +47,26 @@
 			}
 				
 		},
-		defaultOptions = {
-			autoupdate: false,
-			updateEvery: '1 minutes',
-			kinds: [{name: 'Incoming_Agent', kind: 1}],
-			kindsList: [{name: 'Incoming_Agent', kind: 1}, {name: 'Messaging_Chat', kind: 7}, {name: 'Autodial_Agent', kind: 129}, {name: 'Callback_Agent', kind: 257}],
-			// kinds: [1, 7, 129],
-			sl: [5, 10, 15, 20, 25, 30, 35, 40],
-			db: {},
-			tables: [],
-			period: '1 day',
-			catColours: [],
-			catorder: 'catdesc' // changed during the dashboard initiation to the value from the config file
-		},
+		// defaultOptions = {
+		// 	autoupdate: false,
+		// 	updateEvery: '1 minutes',
+		// 	kinds: [{name: 'Incoming_Agent', kind: 1}],
+		// 	kindsList: [{name: 'Incoming_Agent', kind: 1}, {name: 'Messaging_Chat', kind: 7}, {name: 'Autodial_Agent', kind: 129}, {name: 'Callback_Agent', kind: 257}],
+		// 	// kinds: [1, 7, 129],
+		// 	sl: [5, 10, 15, 20, 25, 30, 35, 40],
+		// 	db: {},
+		// 	tables: [],
+		// 	period: '1 day',
+		// 	catColours: [],
+		// 	catorder: 'catdesc' // changed during the dashboard initiation to the value from the config file
+		// },
 		updateTimeout = null;
 
-		vm.options = getDefaultOptions();
+		// vm.options = getDefaultOptions();
+		vm.options = {};
 		vm.data = getDefaultData();
-		vm.begin = utils.periodToRange(vm.options.period).begin;
-		vm.end = utils.periodToRange(vm.options.period).end;
+		vm.begin = null;
+		vm.end = null;
 		vm.stat = {};
 		vm.prevstat = {};
 		vm.catstat = [];
@@ -97,6 +98,7 @@
 		vm.getStat = getStat;
 		vm.openSettings = openSettings;
 		vm.exportDash = exportDash;
+		vm.catorder = 'catdesc';
 
 		$scope.$watch(function() {
 			return vm.options;
@@ -110,7 +112,7 @@
 			if(vm.selectedCat)
 				vm.catchartData = chartService.setChartData(vm.subCatsStat, vm.catchartLabel, vm.options.db.tables.subcategories.columns.description, vm.catchartLabel);
 			else
-				if(vm.options.db.tables) vm.catchartData = chartService.setChartData(vm.catstat, vm.catchartLabel, vm.options.db.tables.categories.columns.description, vm.catchartLabel);
+				if(vm.options.db && vm.options.db.tables) vm.catchartData = chartService.setChartData(vm.catstat, vm.catchartLabel, vm.options.db.tables.categories.columns.description, vm.catchartLabel);
 		});
 		$scope.$on('$destroy', function() {
 			$timeout.cancel(updateTimeout);
@@ -123,7 +125,9 @@
 			debug.log('DB settings', dbSettings);
 			var tables = dbSettings.tables,
 				options = {
-					db: dbSettings,
+					db: {
+						tables: dbSettings.tables
+					},
 					tablesList: [],
 					callstable: tables.calls ? tables.calls : null,
 					cattable: tables.categories ? tables.categories : null,
@@ -131,7 +135,10 @@
 					catorder: tables.categories ? tables.categories.columns.description : null
 				};
 
-			angular.extend(vm.options, options);
+			angular.extend(dbSettings, options);
+			
+			vm.options = dbSettings;
+
 			angular.forEach(tables, function(item){
 				if(item.name) vm.options.tablesList.push(item.name);
 			});
@@ -142,6 +149,9 @@
 
 		function init(){
 			if(!vm.options.kinds.length) return spinnerService.hide('main-loader');
+
+			vm.begin = utils.periodToRange(vm.options.period).begin;
+			vm.end = utils.periodToRange(vm.options.period).end;
 
 			vm.options.kinds.forEach(function(item, index, array) {
 				api.getTasks({ kind: item.kind })
