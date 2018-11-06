@@ -53,9 +53,11 @@
 		function init() {
 			SettingsService.getSettings()
 			.then(function(dbSettings){
-				vm.settings = dbSettings;
+				vm.settings = angular.merge({}, dbSettings);
 				if(!vm.settings.tables.subcategories.columns.category_id) 
 					withSubcats = false;
+
+				debug.log('FCR: ', vm.settings);
 
 				return $q.resolve(vm.settings);
 
@@ -188,7 +190,7 @@
 				task: vm.selectedTasks,
 				table: [tables.calls.name],
 				procid: [tables.calls.name, tables.calls.columns.process_id].join('.'),
-				interval: 3600*24*1000,
+				interval: defaultOptions.interval,
 				begin: vm.begin.valueOf(), 
 				end: vm.end.valueOf()
 			}

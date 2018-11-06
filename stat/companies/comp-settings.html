@@ -9,14 +9,29 @@
         </div>
     </md-toolbar>
     <md-dialog-content>
-        <div layout="column" layout-gt-xs="row" layout-padding>
-            <div flex>
+        <div layout="row" layout-gt-xs="row" layout-padding>
+            <div layout="column" flex="100" flex-gt-xs="30">
                 <md-subheader>Service Level</md-subheader>
-                <md-select ng-model="compSettsVm.sl" aria-label="Service Level">
-                    <md-option ng-value="item" ng-repeat="item in compSettsVm.sls">
+                <div flex>
+                    <md-select ng-model="compSettsVm.sl" aria-label="Service Level">
+                        <md-option ng-value="item" ng-repeat="item in compSettsVm.sls">
+                            {{item}}
+                        </md-option>
+                    </md-select>
+                </div>
+            </div>
+            <div layout="column" flex="100" flex-gt-xs="70">
+                <md-subheader>Tasks</md-subheader>
+                <md-list>
+                    <md-checkbox ng-model="compSettsVm.allTasksSelected" ng-change="compSettsVm.selectAllTasks()" aria-label="Select All Tasks">
+                            Select All
+                    </md-checkbox>
+                    <md-list-item ng-repeat="item in compSettsVm.tasks">
+                        <md-checkbox ng-checked="compSettsVm.exists(item, compSettsVm.selectedTasks)" ng-click="compSettsVm.toggle(item, compSettsVm.selectedTasks)" aria-label="Selected tasks">
+                        </md-checkbox>
                         {{item}}
-                    </md-option>
-                </md-select>
+                    </md-list-item>
+                </md-list>
             </div>
         </div>
     </md-dialog-content>

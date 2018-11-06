@@ -135,9 +135,9 @@
 					catorder: tables.categories ? tables.categories.columns.description : null
 				};
 
-			angular.extend(dbSettings, options);
+			vm.options = angular.merge({}, dbSettings, options);
 			
-			vm.options = dbSettings;
+			// vm.options = dbSettings;
 
 			angular.forEach(tables, function(item){
 				if(item.name) vm.options.tablesList.push(item.name);
@@ -252,9 +252,9 @@
 				},
 				fullscreen: vm.userFullScreen
 			}).then(function(result) {
-				spinnerService.show('main-loader');
+				// spinnerService.show('main-loader');
 				vm.options = result.options;
-				init();
+				getStat();
 			});
 		}
 
@@ -398,7 +398,11 @@
 
 		function getStatData(tasks, kind){
 			return $q(function(resolve, reject) {
-				// if(!tasks.length) return reject();
+				if(!tasks.length) {
+					vm.stat[kind.name] = {};
+					vm.prevstat[kind.name] = {};
+					return resolve();
+				}
 
 				var currParams = {},
 					prevParams = {},
@@ -424,8 +428,8 @@
 				prevParams.begin = currParams.begin - (currParams.end - currParams.begin);
 				prevParams.end = currParams.begin;
 				
-				vm.stat[fkind] = tasks.length ? (vm.stat[fkind] || {}) : {};
-				vm.prevstat[fkind] = tasks.length ? (vm.prevstat[fkind] || {}) : {};
+				vm.stat[fkind] = vm.stat[fkind] || {};
+				vm.prevstat[fkind] = vm.prevstat[fkind] || {};
 
 				getTasksStatistics(currParams, vm.stat[fkind]).then(function(){
 					return getTasksStatistics(prevParams, vm.prevstat[fkind]);
@@ -462,8 +466,11 @@
 		}
 
 		function getCategoriesStat(){
+			debug.log('getCategoriesStat::::', vm.options, vm.data);
+
 			var data, tables = vm.options.db.tables,
-			metrics = ['nca', 'att', 'aht', 'asa', 'sl'+vm.data.Incoming_Agent.sl];
+				metrics = ['nca', 'att', 'aht', 'asa', 'sl'+vm.data.Incoming_Agent.sl],
+				kinds = (vm.options.kinds || []).map(function(item) { return item.kind; });
 			
 			if(tables.calls.columns.callresult) {
 				metrics.push('sum(callresult)');
@@ -480,7 +487,7 @@
 				// tabrel: 'probstat.probcat=probcat.catid and probstat.probcompany=probcompany.compid',
 				tabrel: [tables.calls.name, tables.calls.columns.category].join('.')+'='+[tables.categories.name, tables.categories.columns.id].join('.')+
 						// ' and tasktype in ('+getTaskKinds().join(',')+')'+
-						' and taskid in (\''+getTaskIds().join('\',\'')+'\')'+
+						' and taskid in (\''+getTaskIds(kinds).join('\',\'')+'\')'+
 						' and '+[tables.calls.name, tables.calls.columns.operator].join('.')+'=processed.agentid',
 						// (tables.calls.columns.company ?
 						// ' and '+[tables.calls.name, tables.calls.columns.company].join('.')+'='+[tables.companies.name, tables.companies.columns.id].join('.') :
@@ -598,6 +605,8 @@
 				tasks = getTaskIds([taskKind]);
 
 			debug.log('getGlobalFrc tasks:', kind, func);
+
+			if(!tasks.length) return $q.resolve();
 
 			return api.getCustomFCRStatistics({
 				task: tasks,

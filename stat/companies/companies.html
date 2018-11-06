@@ -26,10 +26,10 @@
 				<table md-table id="performance-table">
 					<thead md-head md-order="compVm.tableSort">
 						<tr md-row>
-							<th md-column md-order-by="compdesc">Company</th>
+							<th md-column md-order-by="{{compVm.settings.tables.companies.columns.description}}">Company</th>
 							<th md-column md-numeric md-order-by="'sl'+{{compVm.sl}}">SL, %</th>
-							<th md-column md-numeric md-order-by="nco">NCO</th>
-							<th md-column md-numeric md-order-by="nco_p">NCO, %</th>
+							<!-- <th md-column md-numeric md-order-by="nco">NCO</th> -->
+							<!-- <th md-column md-numeric md-order-by="nco_p">NCO, %</th> -->
 							<th md-column md-numeric md-order-by="nca">NCA</th>
 							<th md-column md-numeric md-order-by="nca_p">NCA, %</th>
 							<th md-column md-numeric md-order-by="aht">AHT</th>
@@ -44,10 +44,10 @@
 						</tr>
 
 						<tr md-row ng-repeat="stat in compVm.stat | orderBy: compVm.tableSort" ng-click="compVm.onCompSelect(stat)">
-							<td md-cell>{{stat.compdesc}}</td>
+							<td md-cell>{{stat[compVm.settings.tables.companies.columns.description]}}</td>
 							<td md-cell>{{stat['sl'+compVm.sl] | number: 0}}</td>
-							<td md-cell>{{stat.nco | number: 0}}</td>
-							<td md-cell>{{stat.nco_p | number: 1}}</td>
+							<!-- <td md-cell>{{stat.nco | number: 0}}</td> -->
+							<!-- <td md-cell>{{stat.nco_p | number: 1}}</td> -->
 							<td md-cell>{{stat.nca | number: 0}}</td>
 							<td md-cell>{{stat.nca_p | number: 1}}</td>
 							<td md-cell>{{stat.aht | timer}}</td>

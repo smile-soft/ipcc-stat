@@ -36,8 +36,8 @@
 				<table md-table id="fcr-cat-table">
 					<thead md-head md-order="fcrVm.tableSort">
 						<tr md-row>
-							<th md-column ng-if="fcrVm.selectedCat === null" md-order-by="catdesc">Category</th>
-							<th md-column ng-if="fcrVm.selectedCat !== null" md-order-by="catdesc">Subcategory</th>
+							<th md-column ng-if="fcrVm.selectedCat === null" md-order-by="{{fcrVm.settings.tables.categories.columns.description}}">Category</th>
+							<th md-column ng-if="fcrVm.selectedCat !== null" md-order-by="{{fcrVm.settings.tables.categories.columns.description}}">Subcategory</th>
 							<th md-column md-numeric md-order-by="fcrRate">FCR, %</th>
 							<th md-column md-numeric md-order-by="fcr">Resolved Calls</th>
 							<th md-column md-numeric md-order-by="total">Total Calls</th>
@@ -58,8 +58,8 @@
 						</tr>
 
 						<!-- List of categories stat -->
-						<tr md-row ng-if="fcrVm.selectedCat === null" ng-repeat="cat in fcrVm.catFcr | orderBy: fcrVm.tableSort" ng-click="fcrVm.onCatSelect(cat.catdesc)" class="clickable">
-							<td md-cell>{{cat.catdesc}}</td>
+						<tr md-row ng-if="fcrVm.selectedCat === null" ng-repeat="cat in fcrVm.catFcr | orderBy: fcrVm.tableSort" ng-click="fcrVm.onCatSelect(cat[fcrVm.settings.tables.categories.columns.description])" class="clickable">
+							<td md-cell>{{cat[fcrVm.settings.tables.categories.columns.description]}}</td>
 							<td md-cell>{{ cat.fcrRate | number:1 }}</td>
 							<td md-cell>{{ cat.fcr }}</td>
 							<td md-cell>{{ cat.total }}</td>
@@ -78,8 +78,8 @@
 							<td md-cell>{{ fcrVm.totalSubcatFcr.total }}</td>
 						</tr>
 
-						<tr md-row ng-if="fcrVm.selectedCat !== null" ng-repeat="subcat in fcrVm.subcatFcr | orderBy: fcrVm.tableSort" ng-click="fcrVm.onSubcatSelect(subcat.probdesc)" class="clickable">
-							<td md-cell>{{subcat.probdesc}}</td>
+						<tr md-row ng-if="fcrVm.selectedCat !== null" ng-repeat="subcat in fcrVm.subcatFcr | orderBy: fcrVm.tableSort" ng-click="fcrVm.onSubcatSelect(subcat[fcrVm.settings.tables.subcategories.columns.description])" class="clickable">
+							<td md-cell>{{subcat[fcrVm.settings.tables.subcategories.columns.description]}}</td>
 							<td md-cell>{{ subcat.fcrRate | number:1 }}</td>
 							<td md-cell>{{ subcat.fcr }}</td>
 							<td md-cell>{{ subcat.total }}</td>

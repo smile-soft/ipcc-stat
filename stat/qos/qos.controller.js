@@ -34,6 +34,11 @@
 		vm.tableSort = '';
 		vm.tableAvgSort = 'agent';
 		vm.data = store.get('data');
+		vm.initRowsNum = 100;
+		vm.rowsNum = vm.initRowsNum;
+		vm.loadMore = function() {
+			vm.rowsNum += 500;
+		};
 
 		init();
 		spinnerService.hide('main-loader');
@@ -41,7 +46,7 @@
 		function init() {
 			SettingsService.getSettings()
 			.then(function(dbSettings){
-				vm.settings = dbSettings;
+				vm.settings = angular.merge({}, dbSettings);
 				vm.columns = getColumns(dbSettings.tables);
 				
 				debug.log('qos init: ', dbSettings);
@@ -93,7 +98,7 @@
 				procid: [tables.qoscheck.name, tables.qoscheck.columns.procid].join('.'),
 				date: [tables.qoscheck.name, tables.qoscheck.columns.callstamp].join('.'),
 				task: [tables.processed.name, 'taskid'].join('.'),
-				agent: [tables.qoscheck.name, tables.qoscheck.columns.opername].join('.'),
+				agent: [tables.calls.name, tables.calls.columns.operator].join('.'),
 				phone: [tables.qoscheck.name, tables.qoscheck.columns.phone].join('.'),
 				category: [tables.categories.name, tables.categories.columns.description].join('.'),
 				subcategory: [tables.subcategories.name, tables.subcategories.columns.description].join('.'),
@@ -122,7 +127,8 @@
 						' and '+[tables.calls.name, tables.calls.columns.category].join('.')+'='+[tables.categories.name, tables.categories.columns.id].join('.')+
 						' and '+[tables.calls.name, tables.calls.columns.subcategory].join('.')+'='+[tables.subcategories.name, tables.subcategories.columns.id].join('.')+
 						' and '+[tables.calls.name, tables.calls.columns.company].join('.')+'='+[tables.companies.name, tables.companies.columns.id].join('.')+
-						' and '+[tables.qoscheck.name, tables.qoscheck.columns.procid].join('.')+'='+[tables.qoscheck_answers.name, tables.qoscheck_answers.columns.procid].join('.'),
+						' and '+[tables.qoscheck.name, tables.qoscheck.columns.procid].join('.')+'='+[tables.qoscheck_answers.name, tables.qoscheck_answers.columns.procid].join('.')+
+						' and '+[tables.qoscheck_answers.name, tables.qoscheck_answers.columns.answer].join('.')+' is not null',
 				procid: [tables.qoscheck.name, tables.qoscheck.columns.procid].join('.'),
 				columns: Object.keys(vm.columns).map(function(key) { return vm.columns[key]; }),
 				begin: vm.begin.valueOf(),
@@ -138,7 +144,9 @@
 			var stat = [];
 			var data = response.data.result;
 			var columns = vm.columns;
-			// var question = {};
+			var questions = {};
+
+			vm.rowsNum = vm.initRowsNum;
 
 			if(data.length) {
 				// to object
@@ -154,11 +162,13 @@
 					prev[next[columns.procid]].category = next[columns.category];
 					prev[next[columns.procid]].subcategory = next[columns.subcategory];
 					prev[next[columns.procid]].company = next[columns.company];
-					prev[next[columns.procid]].comment = next[columns.comment];
 					prev[next[columns.procid]].questions = prev[next[columns.procid]].questions || {};
 					prev[next[columns.procid]].questions[next[columns.question]] = parseFloat(next[columns.answer]) || 0;
+					prev[next[columns.procid]].comment = next[columns.comment];
 
 					// prev[next[columns.procid]].questions.push(question);
+					questions = Object.keys(prev[next[columns.procid]].questions);
+					vm.qnum = questions.length > vm.qnum.length ? questions : vm.qnum;
 
 					return prev;
 				}, {});
@@ -167,10 +177,16 @@
 				stat = Object.keys(stat).map(function(key) {
 					return stat[key];
 				});
+
 			}
 
 			vm.stat = stat;
-			vm.qnum = stat.length ? Object.keys(stat[0].questions) : [];
+
+			buildExportTable(stat);
+
+			// vm.qnum = stat.length ? Object.keys(stat[0].questions) : [];
+
+			debug.log('showStat: ', stat, vm.qnum);
 
 			getAvgStat();
 
@@ -180,6 +196,7 @@
 		}
 
 		function getAvgStat() {
+
 			var columns = vm.columns;
 			var item = {};
 			var totalAvg = {};
@@ -217,6 +234,66 @@
 			}
 				
 			return tasks;
+		}
+
+		function buildExportTable(data) {
+
+			var tableExists = false,
+				table = document.getElementById('qos-export-table');
+
+			if(table) tableExists = true;
+
+			var thead = table ? table.querySelector('thead') : document.createElement('thead'),
+				tbody = table ? table.querySelector('tbody') : document.createElement('tbody'),
+				qdata, qhead;
+
+			qhead = vm.qnum.map(function(q, index) {
+				return '<th>Q'+(index+1)+'</th>';
+			}).join('');
+
+			thead.innerHTML = ['<tr>',
+								'<th>Date</th>',
+								'<th>Task</th>',
+								'<th>Agent</th>',
+								'<th>Number</th>',
+								'<th>Subject</th>',
+								'<th>Provider</th>',
+								'<th>Service</th>',
+								qhead,
+								'<th>Comment</th>',
+							'</tr>'].join('');
+
+			tbody.innerHTML = data.map(function(item) {
+
+				qdata = vm.qnum.map(function(q, index) {
+					return '<td>'+(item.questions[index+1] || '-')+'</td>';
+				}).join('');
+
+				return ['<tr>',
+							'<td>'+(item.date ? new Date(item.date*1000).toLocaleString() : item.date)+'</td>',
+							'<td>'+item.task+'</td>',
+							'<td>'+item.agent+'</td>',
+							'<td>'+item.phone+'</td>',
+							'<td>'+item.category+'</td>',
+							'<td>'+item.company+'</td>',
+							'<td>'+item.subcategory+'</td>',
+							qdata,
+							'<td>'+item.comment+'</td>',
+						'</tr>'].join('');
+			}).join('');
+
+			if(!tableExists) {
+				table = document.createElement('table');
+
+				table.style.display = 'none';
+				table.id = 'qos-export-table';
+
+				table.appendChild(thead);
+				table.appendChild(tbody);
+				document.body.appendChild(table);
+			}
+
+			debug.log('export table', table);
 		}
 
 	}

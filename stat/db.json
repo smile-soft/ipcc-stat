@@ -17,6 +17,7 @@
 				"calldate": "calltime",
 				"comments": "comments",
 				"cid": "cid",
+				"crmid": "crmid",
 				"callresult": "callresult",
 				"login": "login"
 			}

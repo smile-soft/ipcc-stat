@@ -14,16 +14,19 @@
 	<md-card flex>
 		<md-tabs md-dynamic-height md-border-bottom>
 			<md-tab label="all">
-				<md-content>
-					<md-toolbar>
-						<div class="md-toolbar-tools">
-							<!-- <h2>QOS Result</h2> -->
-							<span flex></span>
-							<md-button href="#" download="qos.xls" onclick="ExcellentExport.excel(this, 'qos-table', 'Category Sheet');">.xlsx</md-button>
-							<md-button href="#" download="qos.csv" onclick="ExcellentExport.csv(this, 'qos-table');">.csv</md-button>
-						</div>
-					</md-toolbar>
+				<md-content style="height: 600px;">
 					<spinner name="qos-loader" show="true"><md-progress-linear md-mode="indeterminate"></md-progress-linear></spinner>
+					<md-subheader class="md-primary">
+						<md-toolbar>
+							<div class="md-toolbar-tools">
+								<!-- <h2>QOS Result</h2> -->
+								<h5>{{ qosVm.rowsNum > qosVm.stat.length ? qos.stat.length : qosVm.rowsNum }} from {{ qosVm.stat.length }} rows</h5>
+								<span flex></span>
+								<md-button href="#" download="qos.xls" onclick="ExcellentExport.excel(this, 'qos-export-table', 'Category Sheet');">.xlsx</md-button>
+								<md-button href="#" download="qos.csv" onclick="ExcellentExport.csv(this, 'qos-export-table');">.csv</md-button>
+							</div>
+						</md-toolbar>
+					</md-subheader>
 					<md-card-content layout="row" layout-wrap>
 						<md-table-container flex>
 							<table md-table id="qos-table">
@@ -34,8 +37,8 @@
 										<th md-column md-order-by="agent">Agent</th>
 										<th md-column md-order-by="phone">Number</th>
 										<th md-column md-order-by="category">Subject</th>
-										<th md-column md-order-by="subcategory">Provider</th>
-										<th md-column md-order-by="company">Service</th>
+										<th md-column md-order-by="company">Provider</th>
+										<th md-column md-order-by="subcategory">Service</th>
 										<th ng-repeat="q in qosVm.qnum track by $index" md-column>Q{{$index+1}}</th>
 										<th md-column md-order-by="comment">Comment</th>
 									</tr>
@@ -45,16 +48,21 @@
 										<td colspan="8">No data for period</td>
 									</tr>
 
-									<tr md-row ng-repeat="stat in qosVm.stat | orderBy: qosVm.tableSort">
-										<td md-cell>{{ stat.date | tsToDate }}</td>
-										<td md-cell>{{ stat.task }}</td>
-										<td md-cell>{{ stat.agent }}</td>
-										<td md-cell>{{ stat.phone }}</td>
-										<td md-cell>{{ stat.category }}</td>
-										<td md-cell>{{ stat.subcategory }}</td>
-										<td md-cell>{{ stat.company }}</td>
-										<td ng-repeat="q in qosVm.qnum track by $index" md-cell>{{ stat.questions[$index+1] || '-' }}</td>
-										<td md-cell>{{ stat.comment }}</td>
+									<tr md-row ng-repeat="stat in qosVm.stat | orderBy: qosVm.tableSort | limitTo: qosVm.rowsNum">
+										<td md-cell>{{ ::stat.date | tsToDate }}</td>
+										<td md-cell>{{ ::stat.task }}</td>
+										<td md-cell>{{ ::stat.agent }}</td>
+										<td md-cell>{{ ::stat.phone }}</td>
+										<td md-cell>{{ ::stat.category }}</td>
+										<td md-cell>{{ ::stat.company }}</td>
+										<td md-cell>{{ ::stat.subcategory }}</td>
+										<td ng-repeat="q in qosVm.qnum track by $index" md-cell>{{ ::stat.questions[$index+1] || '-' }}</td>
+										<td md-cell>{{ ::stat.comment }}</td>
+									</tr>
+									<tr ng-show="qosVm.rowsNum <= qosVm.stat.length">
+										<td colspan="8">
+											<md-button md-no-ink ng-click="qosVm.loadMore()" class="md-primary">Load more</md-button>
+										</td>
 									</tr>
 								</tbody>
 							</table>
@@ -88,12 +96,12 @@
 									</tr>
 
 									<tr md-row ng-repeat="stat in qosVm.statAvg | orderBy: qosVm.tableAvgSort">
-										<td md-cell>{{ stat.agent }}</td>
-										<td ng-repeat="q in qosVm.qnum track by $index" md-cell>{{ (stat.questions[$index+1] / stat.count).toFixed(2) }}</td>
+										<td md-cell>{{ ::stat.agent }}</td>
+										<td ng-repeat="q in qosVm.qnum track by $index" md-cell>{{ ((stat.questions[$index+1] || 0) / stat.count) | number: 2 }}</td>
 									</tr>
 									<tr md-row ng-show="qosVm.stat.length">
 										<td md-cell><b>Total</b></td>
-										<td ng-repeat="q in qosVm.qnum track by $index" md-cell>{{ (qosVm.totalAvg[$index+1] / qosVm.stat.length).toFixed(2) }}</td>
+										<td ng-repeat="q in qosVm.qnum track by $index" md-cell>{{ ((qosVm.totalAvg[$index+1] || 0) / qosVm.stat.length) | number:2 }}</td>
 									</tr>
 								</tbody>
 							</table>

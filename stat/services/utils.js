@@ -6,7 +6,7 @@
         .module('app')
         .factory('utilsService', utilsService);
 
-    // utilsService.$inject = [];
+    // utilsService.$inject = ['debug'];
 
     function utilsService(){
 
@@ -25,6 +25,8 @@
         };
 
         function getTotals(prev, next){
+            console.log('getTotals: ', prev, next);
+
             var totals = {};
             for(var key in prev){
                 if(!isNaN(parseFloat(prev[key])) && !isNaN(parseFloat(next[key]))) {

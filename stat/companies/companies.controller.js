@@ -6,9 +6,9 @@
 		.module('app.companies')
 		.controller('CompaniesController', CompaniesController);
 
-	CompaniesController.$inject = ['$scope', '$mdDialog', '$mdMedia', 'apiService', 'spinnerService', 'SettingsService', 'chartService', 'utilsService', 'debugService', 'errorService'];
+	CompaniesController.$inject = ['$scope', '$mdDialog', '$mdMedia', '$q', 'apiService', 'spinnerService', 'TasksService', 'SettingsService', 'chartService', 'utilsService', 'debugService', 'errorService'];
 
-	function CompaniesController($scope, $mdDialog, $mdMedia, api, spinnerService, SettingsService, chartService, utils, debug, errorService) {
+	function CompaniesController($scope, $mdDialog, $mdMedia, $q, api, spinnerService, TasksService, SettingsService, chartService, utils, debug, errorService) {
 
 		var vm = this;
 		var defaults = {
@@ -33,16 +33,17 @@
 			// 	display: false
 			// }
 		};
-		vm.chartLabel = 'nco';
-		vm.chartMetrics = [{ index: 'nco', name: 'Number of calls offered' }, { index: 'nca', name: 'Number of calls answered' }, { index: 'aht', name: 'Average handle time' }, { index: 'att', name: 'Average talk time' }];
+		vm.chartLabel = 'nca';
+		vm.chartMetrics = [{ index: 'nca', name: 'Number of calls answered' }, { index: 'aht', name: 'Average handle time' }, { index: 'att', name: 'Average talk time' }];
 		vm.begin = utils.periodToRange(defaults.period).begin;
 		vm.end = utils.periodToRange(defaults.period).end;
-		vm.tableSort = '-nco';
+		vm.tableSort = '-nca';
 		vm.getCompaniesStat = getCompaniesStat;
 		vm.openSettings = openSettings;
 		vm.onCompSelect = onCompSelect;
 		vm.userFullScreen = $mdMedia('xs');
-		
+		vm.tasks = [];
+		vm.selectedTasks = [];
 
 		init();
 		spinnerService.hide('main-loader');
@@ -50,9 +51,23 @@
 		function init() {
 			SettingsService.getSettings()
 			.then(function(dbSettings){
-				vm.settings = dbSettings;
-				return getCompaniesStat();
+				vm.settings = angular.merge({}, dbSettings);
+				return $q.resolve(vm.settings);
 			})
+			.then(function(settings) {
+				return TasksService.getTasks(settings.kinds);
+			})
+			.then(function(tasks) {
+				debug.log('tasks: ', tasks);
+				vm.tasks = Object.keys(tasks)
+							.map(function(key) { return tasks[key]; })
+							.reduce(function(prev, next) { return prev.concat(next); }, []);
+
+				vm.selectedTasks = vm.tasks;
+				
+				return $q.resolve();
+			})
+			.then(getCompaniesStat)
 			.then(function() {
 				$scope.$watch(function() {
 					return vm.chartLabel;
@@ -71,9 +86,12 @@
 				controllerAs: 'compSettsVm',
 				parent: angular.element(document.body),
 				locals: {
+					tasks: vm.tasks,
+					selectedTasks: vm.selectedTasks,
 					sl: vm.sl
 				}
 			}).then(function(result) {
+				vm.selectedTasks = result.selectedTasks;
 				vm.sl = result.sl;
 				getCompaniesStat();
 			});
@@ -82,13 +100,15 @@
 		function getCompaniesStat(){
 			var tables = vm.settings.tables;
 			var tablesList = [tables.calls.name, tables.companies.name];
-			var metrics = ['aht', 'att', 'nco', 'nca', 'car', 'asa', 'sl'+vm.sl];
+			// var metrics = ['aht', 'att', 'nco', 'nca', 'car', 'asa', 'sl'+vm.sl];
+			var metrics = ['aht', 'att', 'nca', 'car', 'asa', 'sl'+vm.sl];
 
 			spinnerService.show('companies-loader');
 
 			return api.getCustomListStatistics({
 				tables: tablesList,
-				tabrel: [tables.calls.name, tables.calls.columns.company].join('.')+'='+[tables.companies.name, tables.companies.columns.id].join('.'),
+				tabrel: 'taskid in (\''+vm.selectedTasks.join('\',\'')+'\')'+
+						' and '+[tables.calls.name, tables.calls.columns.company].join('.')+'='+[tables.companies.name, tables.companies.columns.id].join('.'),
 				procid: [tables.calls.name, tables.calls.columns.process_id].join('.'),
 				columns: [tables.calls.columns.company, tables.companies.columns.description],
 				begin: vm.begin.valueOf(),
@@ -99,10 +119,13 @@
 				
 				debug.log('getCompaniesStat: ', response, response.data);
 
-				spinnerService.hide('companies-loader')
+				spinnerService.hide('companies-loader');
+
+				// return debug.log('vm.stat: ', response.data.result, response.data.result.reduce(utils.getTotals));
 
 				if(response.data.error) return errorService.show(response.data.error.message);
 				vm.stat = response.data.result.length ? addPercentageValues(response.data.result, response.data.result.reduce(utils.getTotals)) : [];
+
 				vm.chartData = chartService.setChartData(vm.stat, vm.chartLabel, tables.companies.columns.description, vm.chartLabel);
 				
 			})
@@ -144,6 +167,7 @@
 				begin: vm.begin.valueOf(),
 				end: vm.end.valueOf()
 			}).then(function(response){
+				
 				spinnerService.hide('companies-loader');
 				
 				var processes = utils.queryToObject(response.data.result, columnsKeys);
@@ -169,6 +193,8 @@
 		function addPercentageValues(data, totals){
 			var dataValue;
 				// totals = data.reduce(utils.getTotals);
+
+			// return debug.log('addPercentageValues: ', data, totals);
 
 			return utils.setPercentageValues(data, totals).map(function(item){
 				angular.forEach(item, function(value, key){

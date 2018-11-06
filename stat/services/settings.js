@@ -14,7 +14,7 @@
         var settings = {
             autoupdate: false,
             updateEvery: '1 minutes',
-            kinds: [{name: 'Incoming_Agent', kind: 1}],
+            kinds: [{name: 'Incoming_Agent', kind: 1}, {name: 'Callback_Agent', kind: 257}],
             kindsList: [{name: 'Incoming_Agent', kind: 1}, {name: 'Messaging_Chat', kind: 7}, {name: 'Autodial_Agent', kind: 129}, {name: 'Callback_Agent', kind: 257}],
             // kinds: [1, 7, 129],
             sl: [5, 10, 15, 20, 25, 30, 35, 40],
@@ -37,7 +37,7 @@
 
                 api.getDbSettings()
                 .then(function(dbSettings){
-                    angular.extend(settings, dbSettings.data);
+                    settings = angular.merge({}, settings, dbSettings.data);
                     resolve(settings);
                     fetched = true;
                     

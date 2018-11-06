@@ -15,9 +15,9 @@
                 if (!data.hasOwnProperty('name')) {
                     return console.log("Spinner must specify a name when registering with the spinner service.");
                 }
-                if (spinners.hasOwnProperty(data.name)) {
-                    return console.log("A spinner with the name '" + data.name + "' has already been registered.");
-                }
+                // if (spinners.hasOwnProperty(data.name)) {
+                //     return console.log("A spinner with the name '" + data.name + "' has already been registered.");
+                // }
                 spinners[data.name] = data;
             },
             show: function (name) {

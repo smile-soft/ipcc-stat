@@ -33,29 +33,45 @@
                         <th md-order-by="agent" md-column>Operator</th>
                         <th ng-if="procExpVm.tables.calls.columns.customer_name" md-order-by="cname" md-column>Name</th>
                         <th md-order-by="phone" md-column>Phone</th>
+                        <th ng-if="procExpVm.tables.calls.columns.login" md-order-by="login" md-column>Login</th>
+                        <th ng-if="procExpVm.tables.calls.columns.category" md-order-by="category" md-column>Category</th>
+                        <th ng-if="procExpVm.tables.calls.columns.subcategory" md-order-by="subcategory" md-column>Subcategory</th>
                         <th ng-if="procExpVm.tables.calls.columns.company" md-order-by="description" md-column>Company</th>
                         <th md-order-by="comment" md-column>Comment</th>
                         <th ng-if="procExpVm.tables.calls.columns.callresult" md-order-by="callresult" md-column>Call Resolution</th>
+                        <th ng-if="procExpVm.tables.calls.columns.crmid" md-order-by="crmid" md-column>CRM ID</th>
                     </tr>
                 </thead>
                 <tbody md-body>
-                    <tr md-row ng-repeat="item in procExpVm.data | filter:procExpVm.search | filter:procExpVm.filterByResult | orderBy: procExpVm.order">
+                    <tr md-row ng-show="!procExpVm.data.length">
+                        <td colspan="7">No data for period</td>
+                    </tr>
+                    <tr md-row ng-repeat="item in procExpVm.data | filter:procExpVm.search | filter:procExpVm.filterByResult | orderBy: procExpVm.order | limitTo: procExpVm.rowsNum">
                         <td md-cell>{{::item.date}}</td>
                         <td md-cell>{{::item.agent}}</td>
                         <td ng-if="procExpVm.tables.calls.columns.customer_name" md-cell>{{::item.cname}}</td>
                         <td md-cell>{{::item.phone}}</td>
+                        <td ng-if="item.login" md-cell>{{item.login !== '0' ? item.login : ""}}</td>
+                        <td ng-if="item.category" md-cell>{{::item.category}}</td>
+                        <td ng-if="item.subcategory" md-cell>{{::item.subcategory}}</td>
                         <td ng-if="procExpVm.tables.calls.columns.company" md-cell>{{::item.description}}</td>
                         <td md-cell>{{::item.comment}}</td>
                         <td ng-if="item.callresult == 1" md-cell>+</td>
                         <td ng-if="item.callresult == 0" md-cell>-</td>
+                        <td ng-if="item.crmid" md-cell>{{::item.crmid}}</td>
+                    </tr>
+                    <tr ng-show="procExpVm.rowsNum <= procExpVm.data.length">
+                        <td colspan="7">
+                            <md-button md-no-ink ng-click="procExpVm.loadMore()" class="md-primary">Load more</md-button>
+                        </td>
                     </tr>
                 </tbody>
             </table>
         </md-table-container>
     </md-dialog-content>
     <md-dialog-actions>
-        <md-button href="#" download="{{::procExpVm.exportName}}.xls" onclick="ExcellentExport.excel(this, 'proc-table', 'Processes Sheet');" ng-click="procExpVm.export('xlsx')" class="md-primary">.xlsx</md-button>
-        <md-button href="#" download="{{::procExpVm.exportName}}.csv" onclick="ExcellentExport.csv(this, 'proc-table');" ng-click="procExpVm.export('csv')" class="md-primary">.csv</md-button>
+        <md-button href="#" download="{{::procExpVm.exportName}}.xls" onclick="ExcellentExport.excel(this, 'proc-export-table', 'Processes Sheet');" class="md-primary">.xlsx</md-button>
+        <md-button href="#" download="{{::procExpVm.exportName}}.csv" onclick="ExcellentExport.csv(this, 'proc-export-table');" class="md-primary">.csv</md-button>
         <md-button ng-click="procExpVm.close()">Close</md-button>
     </md-dialog-actions>
 </md-dialog>

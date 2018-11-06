@@ -31,6 +31,7 @@
 							<th md-column md-numeric md-order-by="fcr">FCR, %</th>
 							<th md-column md-numeric md-order-by="['count(callresult)']">Resolved calls</th>
 							<th md-column md-numeric md-order-by="['count(*)']">Total calls</th>
+							<th md-column md-numeric md-order-by="completion">Completion rate, %</th>
 							<th md-column md-numeric md-order-by="['avg(connectTime)']">Avg. talk time</th>
 							<th md-column md-numeric md-order-by="['sum(connectTime)']">Total talk time</th>
 						</tr>
@@ -40,12 +41,13 @@
 							<td colspan="7">No data for period</td>
 						</tr>
 
-						<tr md-row ng-repeat="stat in crrVm.stat | orderBy: crrVm.tableSort">
+						<tr md-row ng-repeat="stat in crrVm.stat | orderBy: crrVm.tableSort" ng-click="crrVm.onAgentSelect(stat)">
 							<td md-cell>{{stat.operator}}</td>
 							<td md-cell>{{ stat.perf | number:1 }}</td>
 							<td md-cell>{{ stat.fcr | number:1 }}</td>
 							<td md-cell>{{ stat['count(callresult)'] }}</td>
 							<td md-cell>{{stat['count(*)']}}</td>
+							<td md-cell>{{ stat.completion | number:1 }}</td>
 							<td md-cell>{{stat['avg(connectTime)'] | timer}}</td>
 							<td md-cell>{{stat['sum(connectTime)'] | timer}}</td>
 						</tr>
